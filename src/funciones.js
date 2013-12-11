@@ -114,10 +114,43 @@ function createBox(posx, posy, scalex, scaley, texture){
     
 	//box.i = i;
     box.anchor.x = box.anchor.y = 0.5;
-    box.scale.x = 50 / 50;
-    box.scale.y = 50 / 50;
+    box.scale.x = scalex;
+    box.scale.y = scaley;
 	box.position.x = posx;
     box.position.y = posy;
+
+    box.buttonMode = true;
+    box.interactive = true;
+
+    box.mouseover = function(data){
+			
+		this.isOver = true;
+		
+		if(this.isdown)return
+		
+		//this.setTexture(textureButtonOver)
+	}
+
+		// set the mouseout callback..
+	box.mouseout = function(data){
+		
+		this.isOver = false;
+		if(this.isdown)return
+	}
+	
+	box.click = function(data){
+		// click!
+		console.log("CLICK!");
+	//	alert("CLICK!")
+	}
+	
+	box.tap = function(data){
+		// click!
+		console.log("TAP!!");
+		//this.alpha = 0.5;
+	}
+
+	console.log("create box");
      
     return box;
 }

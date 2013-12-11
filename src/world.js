@@ -24,6 +24,8 @@ PixelWorld = function (opts) {
 	this.actors = new Actors();
 
 
+
+
 	this.createBox = function ( x, y, width, height, options) 
 	{
 	     //default setting
@@ -61,8 +63,6 @@ PixelWorld = function (opts) {
 }
 
 
-
-
 Actors = function () {
 	
 	this.actors = [];
@@ -75,4 +75,28 @@ Actors = function () {
 	this.addBody = function (body) {
 		this.bodies.push(body);
 	}
+
 }
+
+/*
+Actor.prototype.add_velocity = function(vel)
+{
+	var b = this.body;
+	var v = b.GetLinearVelocity();
+	
+	v.Add(vel);
+	
+	//check for max horizontal and vertical velocities and then set
+	if(Math.abs(v.y) > this.max_ver_vel)
+	{
+		v.y = this.max_ver_vel * v.y/Math.abs(v.y);
+	}
+	
+	if(Math.abs(v.x) > this.max_hor_vel)
+	{
+		v.x = this.max_hor_vel * v.x/Math.abs(v.x);
+	}
+	
+	//set the new velocity
+	b.SetLinearVelocity(v);
+}*/
