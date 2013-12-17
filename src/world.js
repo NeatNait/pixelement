@@ -34,7 +34,9 @@ PixelWorld = function (opts) {
 	        'friction' : 1.0 ,
 	        'restitution' : 0.5 ,
 	         
-	        'type' : b2Body.b2_dynamicBody
+	        'type' : b2Body.b2_dynamicBody,
+			'angle' : 35
+
 	    }, options);
 	       
 	    var body_def = new b2BodyDef();

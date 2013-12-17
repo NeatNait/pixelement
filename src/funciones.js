@@ -150,7 +150,7 @@ function createBox(posx, posy, scalex, scaley, texture){
 		//this.alpha = 0.5;
 	}
 
-	console.log("create box");
+	//console.log("create box");
      
     return box;
 }

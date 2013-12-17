@@ -1,3 +1,11 @@
+
+var jump = false,
+    boost = false,
+    bun = false,
+    muerto = false;
+    lives = 100;
+
+
 (function Main()
 {
 
@@ -6,10 +14,87 @@
 
     //const STAGE_WIDTH = window.innerWidth, STAGE_HEIGHT = window.innerHeight;
     const STAGE_WIDTH = 640, STAGE_HEIGHT = 480;
-    const METER = 100;
+    const METER = 23;
+    const MOVEX = true;
+
 
 
     var world = new PixelWorld();
+
+    var listener = new Box2D.Dynamics.b2ContactListener;
+    listener.BeginContact = function(contact) {
+
+        if (muerto)
+            return;
+
+
+        var bodyA = contact.GetFixtureA().GetBody(),
+            bodyB = contact.GetFixtureB().GetBody();
+
+        //console.log(bodyA.GetUserData());
+        //console.log(bodyB.GetUserData());
+
+
+//FIXME A con B -> B con A
+//FIXME A con B -> B con A
+
+
+        //esto es una prueba solo para el char porque ahora mismo siempre es el 0
+        if((bodyA.GetUserData() == 1) && (bodyB.GetUserData() == 2) && bun == true){
+
+            lives--;
+
+            //if(body.GetUserData())
+            console.error("muerto a los " + bodyA.GetPosition().x + " metros");
+
+            console.log(world);
+            muerto = true;
+            console.log(lives);
+        }
+
+        if((bodyA.GetUserData() == 1) && (bodyB.GetUserData() == 100) && bun == false){
+            lives--;
+
+            //if(body.GetUserData())
+            console.error("muerto a los " + bodyA.GetPosition().x + " metros");
+
+            console.log(world);
+            console.log(lives);
+            muerto = true;
+        }
+
+
+        /*var bAType = contact.GetFixtureA().GetBody().GetType();
+
+
+        if(bAType != b2Body.b2_dynamicBody)
+            console.log("return");
+
+
+        var bBType = contact.GetFixtureB().GetBody().GetType();
+
+
+        if(bBType != b2Body.b2_dynamicBody)
+            console.log("return");
+
+
+        console.error("collision!");*/
+        //console.log("BeginContact");
+    }
+    listener.EndContact = function(contact) {
+        // //console.log(contact.GetFixtureA().GetBody().GetUserData());
+        //console.log("EndContact");
+
+    }
+    listener.PostSolve = function(contact, impulse) {
+        //console.log("PostSolve");
+        
+    }
+    listener.PreSolve = function(contact, oldManifold) {
+        //console.log("PreSolve");
+
+    }
+    world.world.SetContactListener(listener);
 
     // create an new instance of a pixi stage
     var stage = new PIXI.Stage(0x3333333, true),
@@ -36,7 +121,7 @@
 
     //bunny.createBox(containerDisplay);
 
-    var texture = PIXI.Texture.fromImage("assets/box.jpg");
+    var texture = PIXI.Texture.fromImage("assets/b3.png");
     //var bunny = createBox(200,150, 1, 1, texture);
 
     // center the sprites anchor point
@@ -53,7 +138,7 @@
 
 
 
-    function addVel(body){
+    function addVel(body, parV){
         var b = body;
         var v = b.GetLinearVelocity();
     
@@ -71,20 +156,52 @@
             v.x = this.max_hor_vel * v.x/Math.abs(v.x);
         }
 
-        //v.x = 0.267 *2;//Math.random();
-        v.x = 0.8;//Math.random();
+        //v.x = 0.267 ;//Math.random();
+
+        v.x = parV;
+        //v.x = 0.65;
+
         
         b.SetLinearVelocity(v);
     };
 
+    function addJump(body, jump) {
+
+        var b = body;
+        var v = b.GetLinearVelocity();
+    
+        var vel = new b2Vec2(1,0);
+        v.Add(vel);
+        
+        //check for max horizontal and vertical velocities and then set
+        if(Math.abs(v.y) > this.max_ver_vel)
+        {
+            v.y = this.max_ver_vel * v.y/Math.abs(v.y);
+        }
+        
+        if(Math.abs(v.x) > this.max_hor_vel)
+        {
+            v.x = this.max_hor_vel * v.x/Math.abs(v.x);
+        }
+
+        //v.x = 0.267 ;//Math.random();
+
+        v.y = jump;
+        //v.x = 0.65;
+
+        
+        b.SetLinearVelocity(v);
+
+    }
 
 
-    function createFloor(x) {
 
-        var suelo = world.createBox(x, 1, 6, 1, {density : 5.0, type: b2Body.b2_staticBody});
-        var texture = PIXI.Texture.fromImage("assets/box.jpg");
+    function createFloor(x, y) {
 
-        sueloPixi = createBox(x, 1, 6, 1, texture);
+        var suelo = world.createBox(x, y, 6, 1, {density : 5.0, type: b2Body.b2_staticBody, user_data: "suelo"});
+        var texture = PIXI.Texture.fromImage("assets/floor2.png");
+
+        sueloPixi = createBox(x, y, 3*METER/100, 2*METER/100, texture);
 
         world.actors.actors.push(suelo);
         world.actors.bodies.push(sueloPixi);
@@ -93,15 +210,17 @@
 
 
 
-    function createObject(x) {
+    var boxScale = 1.6;
 
-        texture = PIXI.Texture.fromImage("assets/box.jpg");
-        bunny = createBox(1, 5, 0.5, 1, texture);
+    function createObject(name, x, y, texture) {
+
+        texture = PIXI.Texture.fromImage("assets/"+texture);
+        bunny = createBox(1, 5, boxScale*METER/100, boxScale*METER/100, texture);
 
         containerDisplay.addChild(bunny);
 
 
-        var b = world.createBox(x+containerDisplay.position.x/METER * -1, 5, 0.5, 1, {density : 1.0});
+        var b = world.createBox(x+containerDisplay.position.x/METER * -1, y, boxScale, boxScale, {restitution : 0.0, user_data: name});
 
 
         //addVel(b);
@@ -118,29 +237,65 @@
 
 
     //Character
-    var character = createObject(1.5);
+    var character = createObject(1, 0.5, 5, "b3.png");
+    var charPixi = world.actors.bodies[0];
 
-    createFloor(1);
 
-    createFloor(7);
+    boxScale = 1;
 
+    createFloor(1, 0.5);
+    createFloor(7, 0.5);
+
+
+    createFloor(1, 20);
+    createFloor(7, 20);
+
+    var changeTexture = false;
+
+
+    var redtexture = "r3.png";
     
 	function update()
 	{
         cont++;
 
-		requestAnimFrame(update);
+        if(!muerto)
 
-        containerDisplay.position.x -= 2;
+        requestAnimFrame(update);
 
 
-        if(cont%(60*1)==0){
-            createObject(Math.random()*20);
+
+        if(bun && changeTexture != "bunny"){
+
+            charPixi.setTexture(PIXI.Texture.fromImage("assets/"+redtexture));
+
+            changeTexture = "bunny";
+        }
+        else if (!bun && changeTexture != "box"){
+            charPixi.setTexture(PIXI.Texture.fromImage("assets/b3.png"));
+            changeTexture = "box";
+
         }
 
 
-        if(cont%(60*3.5)==0){
-            createFloor(floorActualX*6+1);
+        if(cont%(60/15)==0){
+
+            var texture = "b3.png",
+                muerte = 2;
+            
+            if( Math.random() < 0.5){
+                texture = redtexture;
+                muerte = 100;
+            }
+
+            createObject(muerte, Math.random()*16 + 10, Math.random()*19 + 3, texture);
+        }
+
+
+        if(cont%(60/3)==0){
+            createFloor(floorActualX*6+1, 0.5);
+            createFloor(floorActualX*6+1, 20);
+            createFloor(floorActualX*6+1, Math.random()*10+5);
             floorActualX++;
         }
 
@@ -153,36 +308,92 @@
         for (var i = 0; i < n; i++)
         {
             var body  = world.actors.bodies[i];
+
+            if(body === undefined) continue;
+
             var actor = world.actors.actors[i];
+
+
             var position = actor.GetPosition();
-            var position = actor.GetPosition();
+          
 
             //body.position.x = 500;
             //body.position.y = 500;
-            body.position.x = position.x * 100;
-            body.position.y = (STAGE_HEIGHT - position.y * 100);
+            body.position.x = position.x * METER;
+            body.position.y = (STAGE_HEIGHT - position.y * METER);
             body.rotation = -1 * actor.GetAngle();
+            //body.alpha = 0.4;
+
+
 
         //addVel(actor);
 
 
 
+        if( actor.GetUserData() != 0){}
+            if(position.x + 10 < character.GetPosition().x){
+                console.log("destroy");
+                world.world.DestroyBody(actor);
+
+                world.actors.actors.splice(i,1);
+                world.actors.bodies.splice(i,1);
+                //console.log(n);
+            }
+        }
             
             //actor.rotation = body.GetAngle();
+        
+
+        var position = character.GetPosition();
+        
+        world.actors.bodies[0].alpha = 1;
+
+        //console.log(position.x*METER);
+        //console.log(containerDisplay.position.x);
+        if(position.x*METER+containerDisplay.position.x < METER){
+            //addVel(character,2.267);
+
+        //console.log(containerDisplay.position.x);
+            addVel(character, 0.267*4);
+
+
+        }
+        else{
+            addVel(character, 0.267*10);
         }
 
-        
-        addVel(character);
+        if (jump){
+            addJump(character, 5);
 
+            //console.log("jump");
+            jump = false;
+        }
+
+        if (boost){
+            addVel(character, 50);
+            addVel(character, 50);
+
+            //console.log("boost");
+            boost = false;
+        }
+
+        if(MOVEX)
+            containerDisplay.position.x = position.x*METER*-1 + 3*METER;
+
+
+        //console.log(position.x*METER);
+        //console.log(containerDisplay.position.x);
         
         renderer.render(stage);
         //stats.update();
+
+
 	}
 
 
 
 
-    console.log(world);
+    //console.log(world);
 
 
 
@@ -193,7 +404,7 @@ var canvas_height;
 var canvas_width_m, canvas_height_m;
 
 ///box2d to canvas scale , therefor 1 metre of box2d = 30px of canvas :)
-var scale = 100;
+var scale = METER/20;
 
 
  
@@ -255,9 +466,10 @@ function step()
     ctx.scale(1 , -1);
     world.world.DrawDebugData();
     ctx.restore();
-
-currentX--;
-currentX--;
+if(MOVEX){
+//currentX--;
+//currentX--;
+}
     //call this function again after 1/60 seconds or 16.7ms
     setTimeout(step , 1000 / fps);
 }
@@ -267,3 +479,39 @@ step();
 
 
 })();
+
+
+
+
+
+
+
+
+$(function(){
+
+    $(document).keydown(function(e){
+        //console.log(e.keyCode);
+        jump = true;
+
+        return false;
+    });
+     
+    $(document).keyup(function(e){
+        //console.log(e.keyCode);
+
+        jump = false;
+
+        return false;
+    });
+    
+
+    $(document).mousedown(function(e){
+        //console.log(e);
+
+       // jump = true;
+        bun = !bun;
+        return false;
+    });
+     
+
+});
