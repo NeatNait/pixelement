@@ -237,7 +237,7 @@ var jump = false,
 
 
     //Character
-    var character = createObject(1, 0.5, 5, "b3.png");
+    var character = createObject(1, 0.5, 5, bluetexture);
     var charPixi = world.actors.bodies[0];
 
 
@@ -253,7 +253,9 @@ var jump = false,
     var changeTexture = false;
 
 
-    var redtexture = "r3.png";
+    var redtexture = "r7.png",
+        bluetexture = "b6.png",
+        greentexture = "g7.png";
     
 	function update()
 	{
@@ -272,7 +274,7 @@ var jump = false,
             changeTexture = "bunny";
         }
         else if (!bun && changeTexture != "box"){
-            charPixi.setTexture(PIXI.Texture.fromImage("assets/b3.png"));
+            charPixi.setTexture(PIXI.Texture.fromImage("assets/"+bluetexture));
             changeTexture = "box";
 
         }
@@ -280,11 +282,17 @@ var jump = false,
 
         if(cont%(60/15)==0){
 
-            var texture = "b3.png",
+            var texture = bluetexture,
                 muerte = 2;
             
-            if( Math.random() < 0.5){
+            var rndTexture = Math.random();
+
+            if( rndTexture < 0.3){
                 texture = redtexture;
+                muerte = 100;
+            }
+            else if(rndTexture >= 0.3 && rndTexture < 0.6){
+                texture = greentexture;
                 muerte = 100;
             }
 
@@ -292,7 +300,7 @@ var jump = false,
         }
 
 
-        if(cont%(60/3)==0){
+        if(cont%(60/2)==0){
             createFloor(floorActualX*6+1, 0.5);
             createFloor(floorActualX*6+1, 20);
             createFloor(floorActualX*6+1, Math.random()*10+5);
