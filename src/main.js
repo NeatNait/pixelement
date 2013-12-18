@@ -3,7 +3,8 @@ var jump = false,
     boost = false,
     bun = false,
     muerto = false;
-    lives = 100;
+    lives = 100,
+    game = null;
 
 
 (function Main()
@@ -21,65 +22,71 @@ var jump = false,
 
     var world = new PixelWorld();
 
+    game = world;
+
+
+    
+
+
     var listener = new Box2D.Dynamics.b2ContactListener;
     listener.BeginContact = function(contact) {
+
+        var collidingPixElement,
+            collidingEnemy;
 
         if (muerto)
             return;
 
 
         var bodyA = contact.GetFixtureA().GetBody(),
-            bodyB = contact.GetFixtureB().GetBody();
+            bodyB = contact.GetFixtureB().GetBody(),
+            bodyAUserData = bodyA.GetUserData(),
+            bodyBUserData = bodyB.GetUserData();
 
         //console.log(bodyA.GetUserData());
         //console.log(bodyB.GetUserData());
 
+        //ignore Floor
+        if(bodyAUserData instanceof Floor || bodyBUserData instanceof Floor)
+            return;
 
-//FIXME A con B -> B con A
-//FIXME A con B -> B con A
+
+        //Ignore all but PixElement collisions
+        //if (!(bodyAUserData instanceof PixElement) && (!(bodyBUserData instanceof PixElement)))
+        //    return;
 
 
-        //esto es una prueba solo para el char porque ahora mismo siempre es el 0
-        if((bodyA.GetUserData() == 1) && (bodyB.GetUserData() == 2) && bun == true){
+        //TODO get powers inside of enemys and check enemys power: something like enemy.getPower()
 
-            lives--;
+        //is PixElement the body A?
+        if ((bodyAUserData instanceof PixElement) && ((bodyBUserData instanceof Power))) {
 
-            //if(body.GetUserData())
-            console.error("muerto a los " + bodyA.GetPosition().x + " metros");
+            collidingPixElement = bodyAUserData;
+            collidingEnemy = bodyBUserData;
 
-            console.log(world);
-            muerto = true;
-            console.log(lives);
+        }
+        //is PixElement the body B?
+        else if ((bodyBUserData instanceof PixElement) && ((bodyAUserData instanceof Power))) {
+            
+            collidingPixElement = bodyBUserData;
+            collidingEnemy = bodyAUserData;
+        
+        }
+        //if PixElement and a Power are not involved in the collision
+        //we are not interested in the collision
+        else {
+            return;
         }
 
-        if((bodyA.GetUserData() == 1) && (bodyB.GetUserData() == 100) && bun == false){
-            lives--;
 
-            //if(body.GetUserData())
+        muerto = ! collidingPixElement.getActualPower().checkWinner(collidingEnemy);
+
+        if (muerto){
             console.error("muerto a los " + bodyA.GetPosition().x + " metros");
-
+            console.error("killed by an evil " + collidingEnemy.name );
             console.log(world);
-            console.log(lives);
-            muerto = true;
         }
 
-
-        /*var bAType = contact.GetFixtureA().GetBody().GetType();
-
-
-        if(bAType != b2Body.b2_dynamicBody)
-            console.log("return");
-
-
-        var bBType = contact.GetFixtureB().GetBody().GetType();
-
-
-        if(bBType != b2Body.b2_dynamicBody)
-            console.log("return");
-
-
-        console.error("collision!");*/
-        //console.log("BeginContact");
     }
     listener.EndContact = function(contact) {
         // //console.log(contact.GetFixtureA().GetBody().GetUserData());
@@ -198,7 +205,7 @@ var jump = false,
 
     function createFloor(x, y) {
 
-        var suelo = world.createBox(x, y, 6, 1, {density : 5.0, type: b2Body.b2_staticBody, user_data: "suelo"});
+        var suelo = world.createBox(x, y, 6, 1, {density : 5.0, type: b2Body.b2_staticBody, user_data: new Floor()});
         var texture = PIXI.Texture.fromImage("assets/floor2.png");
 
         sueloPixi = createBox(x, y, 3*METER/100, 2*METER/100, texture);
@@ -212,7 +219,7 @@ var jump = false,
 
     var boxScale = 1.6;
 
-    function createObject(name, x, y, texture) {
+    function createObject(name, x, y, texture, userData) {
 
         texture = PIXI.Texture.fromImage("assets/"+texture);
         bunny = createBox(1, 5, boxScale*METER/100, boxScale*METER/100, texture);
@@ -220,7 +227,7 @@ var jump = false,
         containerDisplay.addChild(bunny);
 
 
-        var b = world.createBox(x+containerDisplay.position.x/METER * -1, y, boxScale, boxScale, {restitution : 0.0, user_data: name});
+        var b = world.createBox(x+containerDisplay.position.x/METER * -1, y, boxScale, boxScale, {restitution : 0.0, user_data: userData});
 
 
         //addVel(b);
@@ -236,10 +243,20 @@ var jump = false,
         floorActualX = 2;
 
 
-    //Character
-    var character = createObject(1, 0.5, 5, bluetexture);
-    var charPixi = world.actors.bodies[0];
 
+    var redtexture = "r7.png",
+        bluetexture = "b6.png",
+        greentexture = "g7.png";
+
+    //Character
+    var character = createObject(1, 0.5, 5, bluetexture, game.pixElement);
+
+    game.pixElement.setBody(character);
+    var charPixi = world.actors.bodies[0];
+    game.pixElement.setRepresentation(charPixi);
+
+
+    game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+redtexture));
 
     boxScale = 1;
 
@@ -253,9 +270,6 @@ var jump = false,
     var changeTexture = false;
 
 
-    var redtexture = "r7.png",
-        bluetexture = "b6.png",
-        greentexture = "g7.png";
     
 	function update()
 	{
@@ -265,7 +279,7 @@ var jump = false,
 
         requestAnimFrame(update);
 
-
+/*
 
         if(bun && changeTexture != "bunny"){
 
@@ -278,25 +292,33 @@ var jump = false,
             changeTexture = "box";
 
         }
-
+*/
 
         if(cont%(60/15)==0){
 
             var texture = bluetexture,
-                muerte = 2;
+                muerte = 2,
+                enemy = null;
             
             var rndTexture = Math.random();
 
             if( rndTexture < 0.3){
                 texture = redtexture;
                 muerte = 100;
+                enemy = new RedPower();
+
             }
             else if(rndTexture >= 0.3 && rndTexture < 0.6){
                 texture = greentexture;
                 muerte = 100;
+                enemy = new GreenPower();
+
+            }
+            else{
+                enemy = new BluePower();
             }
 
-            createObject(muerte, Math.random()*16 + 10, Math.random()*19 + 3, texture);
+            createObject(muerte, Math.random()*16 + 10, Math.random()*19 + 3, texture, enemy);
         }
 
 
@@ -518,6 +540,17 @@ $(function(){
 
        // jump = true;
         bun = !bun;
+
+        var nextPower = game.pixElement.nextPower();
+        console.log(nextPower);
+
+        console.log(nextPower.texture);
+
+
+        game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+nextPower.texture));
+
+
+
         return false;
     });
      

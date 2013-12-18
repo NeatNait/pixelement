@@ -23,7 +23,7 @@ PixelWorld = function (opts) {
 
 	this.actors = new Actors();
 
-
+	this.pixElement = new PixElement();
 
 
 	this.createBox = function ( x, y, width, height, options) 
@@ -79,6 +79,217 @@ Actors = function () {
 	}
 
 }
+
+PixElement = function(){
+
+	//representation of the character on the game physics and rendering motors
+	this.body = null;
+	this.representation = null;
+
+	this.powers = [];
+
+
+	this.powers.push(new RedPower({name:"red"}));
+	this.powers.push(new GreenPower());
+	this.powers.push(new BluePower());
+
+	this.indexActualPower = 0;
+
+	this.actualPower = this.powers[this.indexActualPower];
+
+}
+
+PixElement.prototype.nextPower = function() {
+	
+	this.indexActualPower++;
+
+
+	if(this.indexActualPower > this.powers.length-1)
+		this.indexActualPower = 0;
+
+	return this.getActualPower();
+
+};
+
+
+PixElement.prototype.getActualPower = function() {
+	return this.powers[this.indexActualPower];
+}
+
+PixElement.prototype.setBody = function(body) {
+	return this.body = body;
+}
+
+PixElement.prototype.setRepresentation = function(r) {
+	return this.representation = r;
+}
+
+
+
+
+
+
+
+var Power = function(opts){
+
+  if (opts === undefined)
+    opts = [];
+  
+  this.name = opts.name || "Power";
+  this.weakness = [];
+
+  this.texture = "default.png"
+
+}
+
+Power.prototype.specialAction = function (){
+    return 0;
+}
+
+
+
+/*
+ Check whether the power being questioned is the winner or the
+ Power p passed as argument
+ 
+ returns the power winner
+
+*/
+Power.prototype.checkWinner = function (p){
+
+  //if the opponent is not a power the first wins
+  if (p instanceof Power == false)
+    return this;
+
+
+  //return !(a instanceof this.weakness[0]);
+  
+  if (p instanceof this.weakness[0])
+    return false;
+  else
+    return true;
+}
+
+
+/**
+
+REDPOWER
+
+**/
+var RedPower = function(opts){
+ // console.log(opts);
+  Power.call(this, opts);
+  
+  this.name = "Red Pixel";
+  
+  this.weakness.push(BluePower);
+  this.texture = "r7.png"
+
+}
+
+// inherit Power
+RedPower.prototype = new Power();
+
+// correct the constructor pointer because it points to Power
+RedPower.prototype.constructor = RedPower;
+
+
+
+RedPower.prototype.especialAction = function (){
+  return Power.prototype.specialAction.call(this) + " red";
+}
+
+
+
+
+/**
+
+GREENPOWER
+
+**/
+var GreenPower = function(opts){
+
+  Power.call(this, opts);
+  this.name = "Green Pixel";
+
+  
+  this.weakness.push(RedPower);
+  this.texture = "g7.png"
+
+}
+
+// inherit Power
+GreenPower.prototype = new Power();
+
+// correct the constructor pointer because it points to Power
+GreenPower.prototype.constructor = GreenPower;
+
+
+GreenPower.prototype.especialAction = function (){
+    return "green";
+}
+
+
+
+
+
+/**
+
+BLUEPOWER
+
+**/
+var BluePower = function(opts){
+	
+	Power.call(this, opts);
+	this.name = "Blue Pixel";
+
+
+	this.weakness.push(GreenPower);
+	this.texture = "b6.png"
+
+}
+
+// inherit Power
+BluePower.prototype = new Power();
+
+// correct the constructor pointer because it points to Power
+BluePower.prototype.constructor = BluePower;
+
+
+BluePower.prototype.especialAction = function (){
+    return "blue";
+}
+
+
+
+
+
+var Floor = function(opts){
+
+  if (opts === undefined)
+    opts = [];
+  
+  this.name = opts.name || "Floor";
+  
+
+}
+
+
+
+//TODO get powers inside of enemys
+var Enemy = function(opts){
+
+  if (opts === undefined)
+    opts = [];
+  
+  this.name = opts.name || "Enemy";
+  this.power = new GreenPower();
+
+}
+
+
+
+
 
 /*
 Actor.prototype.add_velocity = function(vel)
