@@ -4,7 +4,11 @@ var jump = false,
     bun = false,
     muerto = false;
     lives = 100,
-    game = null;
+    game = null,
+    points = 0;
+
+
+var sound = new SoundModule();
 
 
 (function Main()
@@ -15,14 +19,19 @@ var jump = false,
 
     //const STAGE_WIDTH = window.innerWidth, STAGE_HEIGHT = window.innerHeight;
     const STAGE_WIDTH = 640, STAGE_HEIGHT = 480;
-    const METER = 23;
+    const METER = 23.4;
     const MOVEX = true;
+    const CHAR_OFFSET = 3*METER;
+    const DEBUG = true;
 
 
 
     var world = new PixelWorld();
 
     game = world;
+
+
+
 
 
     
@@ -46,6 +55,7 @@ var jump = false,
         //console.log(bodyA.GetUserData());
         //console.log(bodyB.GetUserData());
 
+        //FIXME insert BULLET MODE
         //ignore Floor
         if(bodyAUserData instanceof Floor || bodyBUserData instanceof Floor)
             return;
@@ -82,10 +92,63 @@ var jump = false,
         muerto = ! collidingPixElement.getActualPower().checkWinner(collidingEnemy);
 
         if (muerto){
-            console.error("muerto a los " + bodyA.GetPosition().x + " metros");
+
+            var meters = bodyA.GetPosition().x.toFixed(2);
+
+            console.error("muerto a los " + meters + " metros");
             console.error("killed by an evil " + collidingEnemy.name );
+
+            $(".result").html("Dead at " + meters + " meters\n"
+                + "killed by an evil " + collidingEnemy.name + "\n"
+                + "with a total of " + points + " points");
             console.log(world);
+
+            if(points < 1)
+                $(".result").append("<p>Achivement: dead at first pixel, uuugh meaned sight.</p>");
+
+            $(".new-game").show();
+
+              // save canvas image as data url (png format by default)
+
+      /*var canvas = document.getElementById('game-canvas', {preserveDrawingBuffer: true});
+      var dataURL = canvas.toDataURL();
+
+      // set canvasImg image src to dataURL
+      // so it can be saved as an image
+      document.getElementById('canvasImg').src = dataURL;*/
+            
+            sound.endGame();
+
+
+            localStorage.playedGames++;
+            if(localStorage.points < points){
+
+                actualPlayer = localStorage.player;
+
+                var player = prompt("New Record! \nPlease enter your name",actualPlayer);
+
+                localStorage.points = points;
+                localStorage.player = player;
+                localStorage.meters = meters;
+
+                $(".result").append("<p>New Record: " +localStorage.player + ": " + localStorage.points + " points, "
+        + localStorage.meters + " meters</p>");
+
+            }
+
+
+            
+
         }
+        else{
+            points++;
+
+
+            sound.touch();
+
+            $(".result").html(points);
+        }
+
 
     }
     listener.EndContact = function(contact) {
@@ -112,8 +175,11 @@ var jump = false,
     // create a renderer instance
     var renderer = PIXI.autoDetectRenderer(STAGE_WIDTH, STAGE_HEIGHT, null);
     
+    renderer.view.id="game-canvas";
     // add the renderer view element to the DOM
     document.body.appendChild(renderer.view);
+
+console.log(document.getElementById("game-canvas"))
     
     requestAnimFrame( update );
     
@@ -129,21 +195,6 @@ var jump = false,
     //bunny.createBox(containerDisplay);
 
     var texture = PIXI.Texture.fromImage("assets/b3.png");
-    //var bunny = createBox(200,150, 1, 1, texture);
-
-    // center the sprites anchor point
-    //bunny.anchor.x = 0.1;
-    //bunny.anchor.y = 0;
-    
-    // move the sprite t the center of the screen
-    //bunny.position.x = 200;
-    //bunny.position.y = 150;
-
-
-    
-
-
-
 
     function addVel(body, parV){
         var b = body;
@@ -152,7 +203,6 @@ var jump = false,
         var vel = new b2Vec2(1,0);
         v.Add(vel);
         
-        //check for max horizontal and vertical velocities and then set
         if(Math.abs(v.y) > this.max_ver_vel)
         {
             v.y = this.max_ver_vel * v.y/Math.abs(v.y);
@@ -163,11 +213,7 @@ var jump = false,
             v.x = this.max_hor_vel * v.x/Math.abs(v.x);
         }
 
-        //v.x = 0.267 ;//Math.random();
-
         v.x = parV;
-        //v.x = 0.65;
-
         
         b.SetLinearVelocity(v);
     };
@@ -180,7 +226,6 @@ var jump = false,
         var vel = new b2Vec2(1,0);
         v.Add(vel);
         
-        //check for max horizontal and vertical velocities and then set
         if(Math.abs(v.y) > this.max_ver_vel)
         {
             v.y = this.max_ver_vel * v.y/Math.abs(v.y);
@@ -191,11 +236,7 @@ var jump = false,
             v.x = this.max_hor_vel * v.x/Math.abs(v.x);
         }
 
-        //v.x = 0.267 ;//Math.random();
-
         v.y = jump;
-        //v.x = 0.65;
-
         
         b.SetLinearVelocity(v);
 
@@ -270,14 +311,22 @@ var jump = false,
     var changeTexture = false;
 
 
+    sound.startGame();
     
-	function update()
+    var oldtime = new Date;
+	function update(time)
 	{
         cont++;
 
         if(!muerto)
 
         requestAnimFrame(update);
+
+        fps = 1000/(time-oldtime)
+        oldtime = time;
+
+
+
 
 /*
 
@@ -295,6 +344,8 @@ var jump = false,
 */
 
         if(cont%(60/15)==0){
+        //if(cont%(60/8)==0){
+
 
             var texture = bluetexture,
                 muerte = 2,
@@ -322,6 +373,7 @@ var jump = false,
         }
 
 
+        //if((containerDisplay.position.x/METER + STAGE_WIDTH) < floorActualX*6){
         if(cont%(60/2)==0){
             createFloor(floorActualX*6+1, 0.5);
             createFloor(floorActualX*6+1, 20);
@@ -331,7 +383,10 @@ var jump = false,
 
 
         
-        world.world.Step(1 / 60,  3,  3);
+        //world.world.Step(1 / 60,  3,  3);
+        //world.world.ClearForces();
+        
+        world.world.Step(1 / fps*2,  8,  3);
         world.world.ClearForces();
         
         const n = world.actors.actors.length;
@@ -341,52 +396,37 @@ var jump = false,
 
             if(body === undefined) continue;
 
+            
             var actor = world.actors.actors[i];
+            
+            //if(actor.GetUserData() instanceof Floor) continue;
+
 
 
             var position = actor.GetPosition();
-          
 
-            //body.position.x = 500;
-            //body.position.y = 500;
             body.position.x = position.x * METER;
             body.position.y = (STAGE_HEIGHT - position.y * METER);
             body.rotation = -1 * actor.GetAngle();
-            //body.alpha = 0.4;
-
-
-
-        //addVel(actor);
 
 
 
         if( actor.GetUserData() != 0){}
             if(position.x + 10 < character.GetPosition().x){
-                console.log("destroy");
                 world.world.DestroyBody(actor);
 
                 world.actors.actors.splice(i,1);
                 world.actors.bodies.splice(i,1);
-                //console.log(n);
             }
         }
             
-            //actor.rotation = body.GetAngle();
-        
 
         var position = character.GetPosition();
         
         world.actors.bodies[0].alpha = 1;
 
-        //console.log(position.x*METER);
-        //console.log(containerDisplay.position.x);
         if(position.x*METER+containerDisplay.position.x < METER){
-            //addVel(character,2.267);
-
-        //console.log(containerDisplay.position.x);
             addVel(character, 0.267*4);
-
-
         }
         else{
             addVel(character, 0.267*10);
@@ -394,21 +434,11 @@ var jump = false,
 
         if (jump){
             addJump(character, 5);
-
-            //console.log("jump");
             jump = false;
         }
 
-        if (boost){
-            addVel(character, 50);
-            addVel(character, 50);
-
-            //console.log("boost");
-            boost = false;
-        }
-
         if(MOVEX)
-            containerDisplay.position.x = position.x*METER*-1 + 3*METER;
+            containerDisplay.position.x = position.x*METER*-1 + CHAR_OFFSET;
 
 
         //console.log(position.x*METER);
@@ -428,84 +458,6 @@ var jump = false,
 
 
 //var world;
-var ctx;
-var canvas_width;
-var canvas_height;
-var canvas_width_m, canvas_height_m;
-
-///box2d to canvas scale , therefor 1 metre of box2d = 30px of canvas :)
-var scale = METER/20;
-
-
- 
-    var canvas = $('#canvas');
-    ctx = canvas.get(0).getContext('2d');
-     
-    //get internal dimensions of the canvas
-    canvas_width = parseInt(canvas.attr('width'));
-    canvas_height = parseInt(canvas.attr('height'));
-     
-    canvas_height_m = canvas_height / scale;
-    canvas_width_m = canvas_width / scale;
-
-
-
-
-    //setup debug draw
-    var debugDraw = new b2DebugDraw();
-    debugDraw.SetSprite(document.getElementById("canvas").getContext("2d"));
-    debugDraw.SetDrawScale(scale);
-    debugDraw.SetFillAlpha(0.5);
-    debugDraw.SetLineThickness(1.0);
-    debugDraw.SetFlags(b2DebugDraw.e_shapeBit);
-     
-    world.world.SetDebugDraw(debugDraw);
-
-
-function draw_world(world, context) 
-{
-    //convert the canvas coordinate directions to cartesian coordinate direction by translating and scaling
-
-     
-    //write some text
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 15px arial';
-    ctx.fillText('box2d model', canvas_width - 10, canvas_height - 10);
-}
-
-
-currentX = 0;
-function step() 
-{
-    var fps = 60;
-    var timeStep = 1.0/(fps * 0.8);
-
-     //ctx.translate(-1, 0);
-    //move the box2d world ahead
-    world.world.Step(timeStep , 8 , 3);
-    world.world.ClearForces();
-     
-    //redraw the world
-    //draw_world(world.world , ctx);
-        ctx.save();
-    ctx.clearRect( 0, 0, canvas_width, canvas_height); 
-
-
-    ctx.translate(currentX , canvas_height);
-    ctx.scale(1 , -1);
-    world.world.DrawDebugData();
-    ctx.restore();
-if(MOVEX){
-//currentX--;
-//currentX--;
-}
-    //call this function again after 1/60 seconds or 16.7ms
-    setTimeout(step , 1000 / fps);
-}
-
-step();
-
 
 
 })();
@@ -518,6 +470,9 @@ step();
 
 
 $(function(){
+
+    $(".new-game").hide();
+
 
     $(document).keydown(function(e){
         //console.log(e.keyCode);
@@ -536,9 +491,6 @@ $(function(){
     
 
     $(document).mousedown(function(e){
-        //console.log(e);
-
-       // jump = true;
         bun = !bun;
 
         var nextPower = game.pixElement.nextPower();
@@ -546,13 +498,24 @@ $(function(){
 
         console.log(nextPower.texture);
 
+//game.world.SetGravity( new b2Vec2(-1 * (Math.random() * 10), -1 * (Math.random() * 10)) );
 
         game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+nextPower.texture));
 
-
-
         return false;
     });
-     
+
+
+    if(localStorage.points === undefined){
+        localStorage.points = 0;
+        localStorage.meters = 0;
+        localStorage.playedGames = 0;
+        localStorage.player = "Player";
+    }
+
+
+
+    $(".record").html("Last Record: " +localStorage.player + ": " + localStorage.points + " points, "
+        + localStorage.meters + " meters");
 
 });

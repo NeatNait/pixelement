@@ -6,16 +6,36 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title></title>
 	<link rel="stylesheet" href="">
+
+	<style type="text/css">
+
+	body{
+		font-family: verdana;
+	}
+
+	.menu{
+		position: fixed;
+		right:0;
+		top:0;
+		width:200px;
+	}
+	.record{
+		margin-bottom: 1em;
+	}
+	</style>
 </head>
 <body>
 
 
-	<canvas height="480" id="canvas" style="background-color:#333333;" width="640"></canvas>
+	<!--canvas height="480" id="canvas" style="background-color:#333333;" width="640"></canvas-->
 		
 	<!--script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script-->
     <script src="lib/jquery.min.js"></script>
     
     <script src="lib/Box2dWeb-2.1.a.3.js"></script>
+
+    <script src="lib/howler.min.js"></script>
+    <script src="src/sound.js"></script>
 
     <script src="lib/pixi.dev.js"></script>
     <script src="lib/Stats.js"></script>
@@ -23,6 +43,12 @@
     <script src="src/world.js"></script>
     <script src="src/funciones.js"></script>
     <script src="src/main.js"></script>
-    
+    <div class="menu">
+    	<input type="button" class="new-game" value="New Game" onClick="document.location.reload(true)">
+
+	    <div class="record"></div>
+	    <div class="result"></div>
+	</div>
+    <!--img id="canvasImg" alt="Right click to save me!"-->
 </body>
 </html>
