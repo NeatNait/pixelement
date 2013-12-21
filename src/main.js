@@ -8,17 +8,35 @@ var jump = false,
     points = 0;
 
 
-var sound = new SoundModule();
+var sound = new SoundModule({onLoadEnd: onAssetsLoaded});
 
 
-(function Main()
-{
 
-    const loader = new PIXI.AssetLoader(["assets/b6.png",
-                                             "assets/g7.jpg",
+const loader = new PIXI.AssetLoader(["assets/b6.png",
+                                             "assets/g7.png",
                                              "assets/r7.png",
                                              "assets/floor2.png"]);
     
+
+
+
+function onSoundLoaded (argument) {
+
+    // use callback
+    loader.onComplete = onAssetsLoaded;
+     
+    loader.load();
+
+}
+    
+function onAssetsLoaded (argument) {
+    start();
+}
+
+
+function start(){
+
+
 
     var bU = new Box2DUtils(),
         pU = new PixiUtils();
@@ -466,7 +484,8 @@ console.log(document.getElementById("game-canvas"))
 //var world;
 
 
-})();
+}
+//)();
 
 
 

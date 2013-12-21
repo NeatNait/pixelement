@@ -3,7 +3,7 @@
 
 
 
-
+var loadedSounds = 0;
 
 var SoundModule = function (opts) {
 
@@ -12,16 +12,19 @@ var SoundModule = function (opts) {
 
 	this.backgroundSound = new Howl({
 		urls: [ path+'loop1.mp3'],
+	  	onload: this.loadProgress,
 		loop: true
 	});
 
 	this.deadSound = new Howl({
 	  urls: [ path+'dead1.mp3'],
+	  onload: this.loadProgress,
 	  volume: 0.2
 	});
 
 	this.touchSound = new Howl({
 		urls: [ path+'touch.wav'],
+	  	onload: this.loadProgress,
     	sprite: {
 		    0: [0, 923],
 		    1: [923, 1866],
@@ -31,10 +34,26 @@ var SoundModule = function (opts) {
 	  	volume: 0.1
 	});
 
-	console.log(this.touchSound);
+	//TODO
+	/*this.sounds = 3;
+
+	this.loadedSounds = 0;
+
+	this.onLoadEnd = opts.onLoadEnd;
+	this.loaded = false;*/
+
 
 		
 };
+
+SoundModule.prototype.loadProgress = function (argument) {
+
+	loadedSounds++;
+
+	if(loadedSounds == 3){
+		onAssetsLoaded();
+	}
+}
 
 
 SoundModule.prototype.endGame = function() {
