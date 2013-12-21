@@ -14,6 +14,12 @@ var sound = new SoundModule();
 (function Main()
 {
 
+    const loader = new PIXI.AssetLoader(["assets/b6.png",
+                                             "assets/g7.jpg",
+                                             "assets/r7.png",
+                                             "assets/floor2.png"]);
+    
+
     var bU = new Box2DUtils(),
         pU = new PixiUtils();
 
