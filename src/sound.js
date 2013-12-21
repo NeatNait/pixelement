@@ -8,7 +8,7 @@
 var SoundModule = function (opts) {
 
 
-	const path = "assets/sound/";
+	const path = "./assets/sound/";
 
 	this.backgroundSound = new Howl({
 		urls: [ path+'loop1.mp3'],
