@@ -1,4 +1,6 @@
 
+// Power class
+// ---------- 
 var Power = function(opts){
 
   if (opts === undefined)
@@ -11,32 +13,28 @@ var Power = function(opts){
 
 }
 
+// In the future each power will have an special action
 Power.prototype.specialAction = function (){
     return 0;
 }
 
 
 
-/*
- Check whether the power being questioned is the winner or the
- Power p passed as argument
- 
- returns the power winner
 
-*/
+// Check whether the power being questioned is the winner or the
+// Power p passed as argument
+// returns the winner power
+
 Power.prototype.checkWinner = function (p){
 
-  //if the opponent is not a power the first wins
+  //If the opponent is not a power the first wins
   if (p instanceof Power == false)
     return this;
 
 
-  //if theres no weakness the first wins
+  //If theres no weakness the first wins
   if (this.weakness.length == 0)
     return this;
-
-
-  //return !(a instanceof this.weakness[0]);
   
   if (p instanceof this.weakness[0])
     return false;
@@ -45,13 +43,10 @@ Power.prototype.checkWinner = function (p){
 }
 
 
-/**
-
-REDPOWER
-
-**/
+//RedPower
+// ----------
 var RedPower = function(opts){
- // console.log(opts);
+
   Power.call(this, opts);
   
   this.name = "Red Pixel";
@@ -61,7 +56,7 @@ var RedPower = function(opts){
 
 }
 
-// inherit Power
+// Inherit Power
 RedPower.prototype = new Power();
 
 // correct the constructor pointer because it points to Power
@@ -74,13 +69,8 @@ RedPower.prototype.especialAction = function (){
 }
 
 
-
-
-/**
-
-GREENPOWER
-
-**/
+// GreenPower
+// ----------
 var GreenPower = function(opts){
 
   Power.call(this, opts);
@@ -92,10 +82,10 @@ var GreenPower = function(opts){
 
 }
 
-// inherit Power
+// Inherit Power
 GreenPower.prototype = new Power();
 
-// correct the constructor pointer because it points to Power
+// Correct the constructor pointer because it points to Power
 GreenPower.prototype.constructor = GreenPower;
 
 
@@ -107,11 +97,8 @@ GreenPower.prototype.especialAction = function (){
 
 
 
-/**
-
-BLUEPOWER
-
-**/
+// BluePower
+// ----------
 var BluePower = function(opts){
 	
 	Power.call(this, opts);
@@ -123,10 +110,10 @@ var BluePower = function(opts){
 
 }
 
-// inherit Power
+// Inherit Power
 BluePower.prototype = new Power();
 
-// correct the constructor pointer because it points to Power
+// Correct the constructor pointer because it points to Power
 BluePower.prototype.constructor = BluePower;
 
 
@@ -149,23 +136,9 @@ var Floor = function(opts){
 }
 
 
-/*var PowerUp = function(opts){
 
-  if (opts === undefined)
-    opts = [];
-  
-  this.name = opts.name || "PowerUp";
-  
-
-}*7
-
-
-
-/**
-
-POWERUP
-
-**/
+// Power Up
+// ----------
 var PowerUp = function(opts){
 
   Power.call(this, opts);
@@ -190,7 +163,9 @@ PowerUp.prototype.especialAction = function (){
 
 
 
-//TODO get powers inside of enemys
+/*TODO get powers inside of enemies*/
+// Enemy
+// ----------
 var Enemy = function(opts){
 
   if (opts === undefined)

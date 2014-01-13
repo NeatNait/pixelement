@@ -32,15 +32,17 @@ PixElement.prototype.nextPower = function() {
 
 };
 
-
+// Get actual power
 PixElement.prototype.getActualPower = function() {
 	return this.powers[this.indexActualPower];
 }
 
+// Set body
 PixElement.prototype.setBody = function(body) {
 	return this.body = body;
 }
 
+// Set representation
 PixElement.prototype.setRepresentation = function(r) {
 	return this.representation = r;
 }

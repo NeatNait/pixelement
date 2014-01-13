@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title></title>
+	<link rel="stylesheet" href="">
+	<style type="text/css">
+
+	html,body{
+		height: 100%;
+		font-family: arial, verdana, sans-serif;
+	}
+	*{
+		margin:0;
+		padding:0;
+				-webkit-box-sizing: border-box;
+		   -moz-box-sizing: border-box;
+		        box-sizing: border-box;
+	}
+
+	div{
+		height:100%;
+		width:50%;
+		float: left;
+		background: black;
+
+	}
+
+	#changeElement{
+		background: #FF3F3F;
+	}
+
+	#points{
+		width: 80%;
+		height: 80%;
+		position: absolute;
+		top: 0;
+		left: 0;
+		background-color: rgba(255,255,255,0.3);
+		/*color: rgba(255,255,255,0.5);*/
+		margin:10%;
+		color:black;
+		text-align: center;
+		padding: 10%;
+		font-size: 3em;
+	}
+	</style>
+
+</head>
+<body>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+	  var socket = io.connect('http://192.168.1.22:8081');
+		 socket.on('connect', function () {
+		    //socket.send('hi');
+
+		    socket.on('newgamestate', function (data) {
+		      // my msg
+
+				if(data.status == "newgame"){
+			    	colorIndex = 0;
+					$("#changeElement").css("background-color",color[colorIndex]);
+					$("#points").hide();
+
+				}
+
+				console.log(data);
+				if(data.status == "endgame"){
+					$("#points").html(data.points + " points<br>" + data.meters + " meters").show();
+				}
+
+		    });
+		  });
+
+
+
+	var color = ["#FF3F3F", "#3FFF6D", "#3FE8FF"],
+		colorIndex = 0;
+
+
+	$(function () {
+
+		$("#changeElement").on("touchstart", function(){
+			socket.emit('sendmovement', { move: 'changeElement' });
+			
+			colorIndex++;
+
+			if(colorIndex >= color.length)
+				colorIndex = 0;
+
+			$(this).css("background-color",color[colorIndex]);
+		});
+
+		$("#jump").on("touchstart", function(){
+			socket.emit('sendmovement', { move: 'jump' });
+		});
+	});
+
+
+	</script>
+
+
+	<div id="jump"></div>
+	<div id="changeElement"></div>
+	<div id="points">connecting</div>
+
+
+</body>
+</html>

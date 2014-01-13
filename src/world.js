@@ -1,19 +1,19 @@
-//world
-
-// Variables used in box2d
-var b2Vec2 = Box2D.Common.Math.b2Vec2
-    , b2AABB = Box2D.Collision.b2AABB
-    , b2BodyDef = Box2D.Dynamics.b2BodyDef
-    , b2Body = Box2D.Dynamics.b2Body
-    , b2FixtureDef = Box2D.Dynamics.b2FixtureDef
-    , b2World = Box2D.Dynamics.b2World
-    , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape
-    , b2DebugDraw = Box2D.Dynamics.b2DebugDraw
-    , b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef
-    , b2RevoluteJointDef =  Box2D.Dynamics.Joints.b2RevoluteJointDef
-    ;
+// Aliases for Box2D
+var b2Vec2 = Box2D.Common.Math.b2Vec2,
+	b2AABB = Box2D.Collision.b2AABB,
+	b2BodyDef = Box2D.Dynamics.b2BodyDef,
+	b2Body = Box2D.Dynamics.b2Body,
+	b2FixtureDef = Box2D.Dynamics.b2FixtureDef,
+	b2World = Box2D.Dynamics.b2World,
+	b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape,
+	b2DebugDraw = Box2D.Dynamics.b2DebugDraw,
+	b2MouseJointDef =  Box2D.Dynamics.Joints.b2MouseJointDef,
+	b2RevoluteJointDef =  Box2D.Dynamics.Joints.b2RevoluteJointDef;
 
 
+
+// Pixel World Class
+// ------
 // Set the default values for the world
 PixelWorld = function (opts) {
 
@@ -28,17 +28,15 @@ PixelWorld = function (opts) {
 
 
 	// Function used to create objects in the world
-	this.createBox = function ( x, y, width, height, options) 
+	this.createBox = function (x, y, width, height, options) 
 	{
-	     //default setting
+	    //Default setting for a box
 	    options = $.extend(true, {
 	        'density' : 1.0 ,
 	        'friction' : 1.0 ,
 	        'restitution' : 0.5 ,
-	         
 	        'type' : b2Body.b2_dynamicBody,
 			'angle' : 35
-
 	    }, options);
 	       
 	    var body_def = new b2BodyDef();
@@ -66,6 +64,8 @@ PixelWorld = function (opts) {
 
 }
 
+// Actors Class
+// ------
 // Class containing actors and bodies of the game
 Actors = function () {
 	
@@ -81,39 +81,3 @@ Actors = function () {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-Actor.prototype.add_velocity = function(vel)
-{
-	var b = this.body;
-	var v = b.GetLinearVelocity();
-	
-	v.Add(vel);
-	
-	//check for max horizontal and vertical velocities and then set
-	if(Math.abs(v.y) > this.max_ver_vel)
-	{
-		v.y = this.max_ver_vel * v.y/Math.abs(v.y);
-	}
-	
-	if(Math.abs(v.x) > this.max_hor_vel)
-	{
-		v.x = this.max_hor_vel * v.x/Math.abs(v.x);
-	}
-	
-	//set the new velocity
-	b.SetLinearVelocity(v);
-}*/
