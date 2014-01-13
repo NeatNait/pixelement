@@ -23,7 +23,7 @@ var SoundModule = function (opts) {
 	});
 
 	this.touchSound = new Howl({
-		urls: [ path+'touch.wav'],
+		urls: [ path+'touch.mp3'],
 	  	onload: this.loadProgress,
     	sprite: {
 		    0: [0, 923],
