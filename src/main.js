@@ -1,22 +1,36 @@
 
+
+
 var jump = false,
     boost = false,
     bun = false,
     muerto = false;
     lives = 100,
     game = null,
-    points = 0;
+    points = 0,
+    shield = false;
 
 
-var sound = new SoundModule({onLoadEnd: onAssetsLoaded});
+
+var params = {
+    difficultyFactor: 15,
+    difficulty: 1,
+    fps:0
+};
+
+
+var sound = new SoundModule({onLoadEnd: onSoundLoaded});
 
 
 
 const loader = new PIXI.AssetLoader(["assets/b6.png",
-                                             "assets/g7.png",
-                                             "assets/r7.png",
-                                             "assets/floor2.png"]);
-    
+                                     "assets/g7.png",
+                                     "assets/r7.png",
+                                     "assets/w1.png",
+                                     "assets/shields/b6.png",
+                                     "assets/shields/g7.png",
+                                     "assets/shields/r7.png",
+                                     "assets/floor2.png"]);
 
 
 
@@ -30,9 +44,24 @@ function onSoundLoaded (argument) {
 }
     
 function onAssetsLoaded (argument) {
+
     start();
 }
 
+
+function restart (argument) {
+    $("canvas").remove();
+    muerto = false;
+    loader = new PIXI.AssetLoader(["assets/b6.png",
+                                     "assets/g7.png",
+                                     "assets/r7.png",
+                                     "assets/shields/b6.png",
+                                     "assets/shields/g7.png",
+                                     "assets/shields/r7.png",
+                                     "assets/floor2.png"]);
+    loader.onComplete = onAssetsLoaded;
+    loader.load();
+}
 
 function start(){
 
@@ -109,13 +138,46 @@ function start(){
         //if PixElement and a Power are not involved in the collision
         //we are not interested in the collision
         else {
+
+            //console.log("power up");
+            //shield = true;
             return;
         }
+
+        if(collidingEnemy instanceof PowerUp){
+
+            sound.shieldOn();
+
+            shield = true;
+            console.log("escudo");
+            game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/shields/"+game.pixElement.getActualPower().texture));
+
+        }
+
 
 
         muerto = ! collidingPixElement.getActualPower().checkWinner(collidingEnemy);
 
+
         if (muerto){
+
+            if(shield){
+                muerto = false;
+                
+                sound.shieldOff();
+                
+
+                game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+game.pixElement.getActualPower().texture));
+
+                //get some extra time so you can really escape from the enemy
+                setTimeout(function () {
+                    console.log("fuera escudo");
+                    shield = false;
+
+
+                },500);
+                return;
+            }
 
             var meters = bodyA.GetPosition().x.toFixed(2);
 
@@ -161,7 +223,7 @@ function start(){
             }
 
 
-            
+            emitEndGame(points, meters);
 
         }
         else{
@@ -284,7 +346,7 @@ console.log(document.getElementById("game-canvas"))
 
     var boxScale = 1.6;
 
-    function createObject(name, x, y, texture, userData) {
+    function createObject(x, y, texture, userData) {
 
         texture = PIXI.Texture.fromImage("assets/"+texture);
         bunny = createBox(1, 5, boxScale*METER/100, boxScale*METER/100, texture);
@@ -314,7 +376,7 @@ console.log(document.getElementById("game-canvas"))
         greentexture = "g7.png";
 
     //Character
-    var character = createObject(1, 0.5, 5, bluetexture, game.pixElement);
+    var character = createObject(0.5, 5, bluetexture, game.pixElement);
 
     game.pixElement.setBody(character);
     var charPixi = world.actors.bodies[0];
@@ -340,17 +402,20 @@ console.log(document.getElementById("game-canvas"))
     var oldtime = new Date;
 	function update(time)
 	{
+
+        //stats.begin();
+
         cont++;
 
         if(!muerto)
 
-        requestAnimFrame(update);
+            requestAnimFrame(update);
 
-        fps = 1000/(time-oldtime)
+        fps = 1000/(time-oldtime);
         oldtime = time;
 
 
-
+        params.fps = fps;
 
 /*
 
@@ -367,25 +432,26 @@ console.log(document.getElementById("game-canvas"))
         }
 */
 
-        if(cont%(60/15)==0){
+
+
+        if(cont%(Math.round(60/params.difficulty))==0){
         //if(cont%(60/8)==0){
+
+            $(".difficulty").html(Math.ceil(params.difficulty/params.difficultyFactor) + " lvl");
 
 
             var texture = bluetexture,
-                muerte = 2,
                 enemy = null;
             
             var rndTexture = Math.random();
 
             if( rndTexture < 0.3){
                 texture = redtexture;
-                muerte = 100;
                 enemy = new RedPower();
 
             }
             else if(rndTexture >= 0.3 && rndTexture < 0.6){
                 texture = greentexture;
-                muerte = 100;
                 enemy = new GreenPower();
 
             }
@@ -393,7 +459,11 @@ console.log(document.getElementById("game-canvas"))
                 enemy = new BluePower();
             }
 
-            createObject(muerte, Math.random()*16 + 10, Math.random()*19 + 3, texture, enemy);
+            createObject(Math.random()*16 + 10, Math.random()*19 + 3, texture, enemy);
+
+            if(Math.random()<0.1)
+                createObject(Math.random()*16 + 10, Math.random()*19 + 3, "w1.png", new PowerUp());
+
         }
 
 
@@ -449,12 +519,18 @@ console.log(document.getElementById("game-canvas"))
         
         world.actors.bodies[0].alpha = 1;
 
-        if(position.x*METER+containerDisplay.position.x < METER){
-            addVel(character, 0.267*4);
-        }
-        else{
+        //set difficulty
+        //difficulty = Math.round(position.x/params.difficultyFactor);
+        params.difficulty = position.x/params.difficultyFactor + 3;
+
+
+   
+        //if(position.x*METER+containerDisplay.position.x < METER){
+          //  addVel(character, 0.267*4);
+        //}
+        //else{
             addVel(character, 0.267*10);
-        }
+        //}
 
         if (jump){
             addJump(character, 5);
@@ -470,7 +546,6 @@ console.log(document.getElementById("game-canvas"))
         
         renderer.render(stage);
         //stats.update();
-
 
 	}
 
@@ -500,7 +575,22 @@ $(function(){
 
 
     $(document).keydown(function(e){
+        
         //console.log(e.keyCode);
+        
+        //esc for reloading
+        if(e.keyCode == 27){
+            document.location.reload(true)
+            return false;
+        }
+        
+        //enter for changing color
+        if(e.keyCode == 13){
+            changeElement();
+            return false;
+        }
+
+        //any key for jumping
         jump = true;
 
         return false;
@@ -516,19 +606,10 @@ $(function(){
     
 
     $(document).mousedown(function(e){
-        bun = !bun;
-
-        var nextPower = game.pixElement.nextPower();
-        console.log(nextPower);
-
-        console.log(nextPower.texture);
-
-//game.world.SetGravity( new b2Vec2(-1 * (Math.random() * 10), -1 * (Math.random() * 10)) );
-
-        game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+nextPower.texture));
-
-        return false;
+        changeElement();
     });
+
+
 
 
     if(localStorage.points === undefined){
@@ -544,3 +625,28 @@ $(function(){
         + localStorage.meters + " meters");
 
 });
+
+
+function changeElement () {
+    bun = !bun;
+
+    var nextPower = game.pixElement.nextPower(),
+        shieldTexture;
+    //console.log(nextPower);
+
+    if(shield)
+        shieldTexture = "shields/"
+    else
+        shieldTexture = "";
+    //console.log(nextPower.texture);
+
+//game.world.SetGravity( new b2Vec2(-1 * (Math.random() * 10), -1 * (Math.random() * 10)) );
+
+    game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+shieldTexture+nextPower.texture));
+
+    return false;
+}
+
+function jump () {
+    jump = true;
+}

@@ -162,6 +162,11 @@ Power.prototype.checkWinner = function (p){
     return this;
 
 
+  //if theres no weakness the first wins
+  if (this.weakness.length == 0)
+    return this;
+
+
   //return !(a instanceof this.weakness[0]);
   
   if (p instanceof this.weakness[0])
@@ -272,6 +277,46 @@ var Floor = function(opts){
   this.name = opts.name || "Floor";
   
 
+}
+
+
+/*var PowerUp = function(opts){
+
+  if (opts === undefined)
+    opts = [];
+  
+  this.name = opts.name || "PowerUp";
+  
+
+}*7
+
+
+
+/**
+
+POWERUP
+
+**/
+var PowerUp = function(opts){
+
+  Power.call(this, opts);
+  this.name = "Power Up";
+
+  
+  //this.weakness.push(RedPower);
+  this.texture = "w1.png"
+
+}
+
+// inherit Power
+PowerUp.prototype = new Power();
+
+// correct the constructor pointer because it points to Power
+PowerUp.prototype.constructor = PowerUp;
+
+
+PowerUp.prototype.especialAction = function (){
+    return "powerup";
 }
 
 
