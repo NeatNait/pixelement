@@ -5,15 +5,32 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<title></title>
-	<link rel="stylesheet" href="">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+    
 
 	<style type="text/css">
 
-	body{
-		font-family: verdana;
+	/*body{
+		text-align: center;
+	}*/
+
+	#game-canvas-wrapper{
+		text-align: center;
+    border: 2px dashed #C8C8C8;
 	}
 
-	.menu {
+  /*#lvl-bar{
+    -webkit-transition: width .1s linear;
+       -moz-transition: width .1s linear;
+        -ms-transition: width .1s linear;
+         -o-transition: width .1s linear;
+            transition: width .1s linear;
+  }*/
+	/*.menu {
 		position: fixed;
 		left: 1em;
 		top: 3.5em;
@@ -24,13 +41,21 @@
 		font-weight: bold;
 		font-size: 1.5em;
 	}
-
+  
 	.record{
 		margin-bottom: 1em;
-	}
+	}*/
+
+  .badge.points{
+    font-size: 31px;
+    background: #4ab9db;
+  }
+  canvas{
+    border: 1px solid rgb(17, 17, 17);
+  }
 	</style>
 </head>
-<body>
+<body ng-app="scoresApp" ng-controller="PeopleCtrl">
 
 
 	<!--canvas height="480" id="canvas" style="background-color:#333333;" width="640"></canvas-->
@@ -48,20 +73,201 @@
     <script src="lib/Stats.js"></script>
     <!--script src="src/utils/MathUtil.js"></script-->
     <script src="src/world.js"></script>
+    <script src="src/pixelement.js"></script>
+    <script src="src/power.js"></script>
     <script src="src/funciones.js"></script>
     <script src="src/main.js"></script>
-    <div class="menu">
-    	<input type="button" class="new-game" value="New Game" onClick="document.location.reload(true)">
-    	<input type="button" class="new-game" value="Restart" onClick="restart()">
 
-	    <div class="result"></div>
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script>
+
+
+<div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="http://neatnait.com" target="_blank" class="navbar-brand">NeatNait</a>
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#navbar-main">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+        <!--div class="navbar-collapse collapse" id="navbar-main">
+          //TODO       
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#">How to play</a></li>
+          </ul>
+
+        </div-->
+      </div>
+    </div>
+<div class="container">
+
+<div class="bs-docs-section">
+        <div class="page-header">
+          <div class="row">
+            <div class="col-lg-12">
+              <h1>pixElement</h1>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row">
+          <div class="col-xs-2">       
+			       <div class="well well-sm">
+              <span class="player">sook</span>
+	           </div>
+          </div>
+          <div class="col-xs-4">
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                  <button type="button" class="new-game btn btn-info" onClick="document.location.reload(true)">New Game</button>
+                  <button type="button" class="btn btn-default" onClick="changePlayerName()">Change Name</button>
+                  <button type="button" class="btn btn-default" data-toggle="modal" data-target="#records-modal" ng-click="getScores()">Show Ranking</button>
+                  <!--<button type="button" class="new-game btn btn-default" value="Restart" onClick="restart()"-->
+
+                </div>
+                
+              </div>
+          	
+          </div>
+   
+        <div class="col-xs-2">
+          <span class="badge points">0</span>
+        </div>
+        
+        <div class="col-xs-4">      
+           <div class="col-xs-4">Difficulty</div>       
+           <div class="col-xs-8">       
+              <div class="progress progress-striped active">
+                <div id="lvl-bar" class="progress-bar progress-bar-success"  role="progressbar" style="width: 0%">
+                  <!--span class="sr-only">45% Complete</span-->
+                </div>
+              </div>
+            </div>
+            </div>
+        </div>
+
+
+
+
+  <div id="end-game" class="alert alert-dismissable alert-danger">
+    <button type="button" class="close" data-dismiss="alert">×</button>
+    <strong>Game Over!</strong> <span class="result"></span>
+  </div>
+
+	<div id="achivement" class="alert alert-dismissable alert-success">
+	  <button type="button" class="close" data-dismiss="alert">×</button>
+	  <strong>Achivement!</strong> Dead at first pixel, uuugh meaned sight<!--a href="#" class="alert-link">Dead at first pixel, uuugh meaned sight</a-->.
+	</div>
+
+</div>
+
+<!---->
+<!---->
+<!---->
+<!---->
+<!---->
+<!-- REMOVE THE END TO WORK-->
+	<div id="game-canvas-wrapper"></div>
+
+
+
+
+
+	<div class="menu">
+
 	</div>
 
     <div class="difficulty"></div>
     <div class="record"></div>
 
+
+
+
+
+
+
+
+  <footer>
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="page-header">
+            </div>
+            <p>Made by <a href="mailto:ruben@neatnait.com">Ruben Utrilla Utrilla</a> &amp; <a href="mailto:alvaro@neatnait.com">Álvaro Cerdá Pinot</a> at <a href="http://neatnait.com">NeatNait</a>.</p>
+            <p>Code licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License v2.0</a>.</p>
+
+          </div>
+        </div>
+        
+      </footer>
+</div>
+
+
+
+  <!-- Modal -->
+  <div class="modal fade" id="records-modal" tabindex="-1" role="dialog" aria-labelledby="records-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title" id="records-modal-label">Modal title</h4>
+        </div>
+        <div class="modal-body">
+           <div>
+            <div>
+                <p>    Click <a ng-click="getScores()">here</a> to reload data.</p>
+
+                <ul class="list-group">
+                  <li class="list-group-item" ng-repeat="score in scores">
+                    <span class="badge">{{score.points}} points</span>
+                    <span class="badge">{{score.meters}} meters</span>
+                    #{{$index+1}} {{score.player}}
+                  </li>
+                </ul>
+
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+
 	<script src="lib/socket.io.js"></script>
 	<script>
+
+
+      var app = angular.module('scoresApp', []);
+
+      function PeopleCtrl($scope, $http) {
+
+        $scope.scores = [];
+
+        $scope.getScores = function() {
+          var httpRequest = $http({
+            method: 'GET',
+            url: 'http://localhost:8089/api/score',
+          }).success(function(data, status) {
+           $scope.scores = data;
+          });
+
+        };
+
+        //$scope.getScores();
+
+        //setInterval($scope.getScores, 60000);
+
+      }
+
+
+
 	  	var socket = io.connect('http://localhost:8081');
 
 
@@ -94,7 +300,6 @@
 
 		$(function(){
 
-			
 
 			/*var gui = new dat.GUI();
   			gui.add(params, 'difficultyFactor', 0, 100);

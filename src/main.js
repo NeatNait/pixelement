@@ -1,28 +1,27 @@
-
-
-
+// General conditions in the game
 var jump = false,
-    boost = false,
-    bun = false,
-    muerto = false;
-    lives = 100,
+    dead = false;
     game = null,
     points = 0,
     shield = false;
 
-
-
+// Params used in some operations
 var params = {
-    difficultyFactor: 15,
+    difficultyFactor: 20,
     difficulty: 1,
-    fps:0
+    maxDifficulty: 35,
+    fps:0,
+    pixElementScale: 1.6,
+    boxScale: 1,
+    shieldOffTime: 500
 };
 
 
+//Get the sound module into action
 var sound = new SoundModule({onLoadEnd: onSoundLoaded});
 
 
-
+//Assets graphics preloader
 const loader = new PIXI.AssetLoader(["assets/b6.png",
                                      "assets/g7.png",
                                      "assets/r7.png",
@@ -33,14 +32,10 @@ const loader = new PIXI.AssetLoader(["assets/b6.png",
                                      "assets/floor2.png"]);
 
 
-
 function onSoundLoaded (argument) {
-
-    // use callback
+    //When every sound is loaded use callback to start loading assest
     loader.onComplete = onAssetsLoaded;
-     
     loader.load();
-
 }
     
 function onAssetsLoaded (argument) {
@@ -49,46 +44,21 @@ function onAssetsLoaded (argument) {
 }
 
 
-function restart (argument) {
-    $("canvas").remove();
-    muerto = false;
-    loader = new PIXI.AssetLoader(["assets/b6.png",
-                                     "assets/g7.png",
-                                     "assets/r7.png",
-                                     "assets/shields/b6.png",
-                                     "assets/shields/g7.png",
-                                     "assets/shields/r7.png",
-                                     "assets/floor2.png"]);
-    loader.onComplete = onAssetsLoaded;
-    loader.load();
-}
-
 function start(){
-
 
 
     var bU = new Box2DUtils(),
         pU = new PixiUtils();
 
-    //const STAGE_WIDTH = window.innerWidth, STAGE_HEIGHT = window.innerHeight;
+    /*const STAGE_WIDTH = window.innerWidth, STAGE_HEIGHT = window.innerHeight;*/
     const STAGE_WIDTH = 640, STAGE_HEIGHT = 480;
     const METER = 23.4;
-    const MOVEX = true;
     const CHAR_OFFSET = 3*METER;
     const DEBUG = true;
 
 
-
     var world = new PixelWorld();
-
     game = world;
-
-
-
-
-
-    
-
 
     var listener = new Box2D.Dynamics.b2ContactListener;
     listener.BeginContact = function(contact) {
@@ -96,7 +66,7 @@ function start(){
         var collidingPixElement,
             collidingEnemy;
 
-        if (muerto)
+        if (dead)
             return;
 
 
@@ -105,21 +75,20 @@ function start(){
             bodyAUserData = bodyA.GetUserData(),
             bodyBUserData = bodyB.GetUserData();
 
-        //console.log(bodyA.GetUserData());
-        //console.log(bodyB.GetUserData());
 
-        //FIXME insert BULLET MODE
-        //ignore Floor
+        /*FIXME insert BULLET MODE*/
+        //Ignore the Floor
         if(bodyAUserData instanceof Floor || bodyBUserData instanceof Floor)
             return;
 
 
-        //Ignore all but PixElement collisions
-        //if (!(bodyAUserData instanceof PixElement) && (!(bodyBUserData instanceof PixElement)))
-        //    return;
+        /*Ignore all but PixElement collisions
+        no longer used
+        if (!(bodyAUserData instanceof PixElement) && (!(bodyBUserData instanceof PixElement)))
+            return;*/
 
 
-        //TODO get powers inside of enemys and check enemys power: something like enemy.getPower()
+        /*TODO get powers of enemies and check enemys power: something like enemy.getPower()*/
 
         //is PixElement the body A?
         if ((bodyAUserData instanceof PixElement) && ((bodyBUserData instanceof Power))) {
@@ -135,94 +104,102 @@ function start(){
             collidingEnemy = bodyAUserData;
         
         }
-        //if PixElement and a Power are not involved in the collision
+        //If PixElement and a Power are not involved in the collision
         //we are not interested in the collision
         else {
-
-            //console.log("power up");
-            //shield = true;
             return;
         }
 
+        //If the Power is a PowerUp set it as active
         if(collidingEnemy instanceof PowerUp){
 
             sound.shieldOn();
 
             shield = true;
-            console.log("escudo");
             game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/shields/"+game.pixElement.getActualPower().texture));
 
         }
 
 
+        //Check whether the actual element kills or not pixElement
+        dead = ! collidingPixElement.getActualPower().checkWinner(collidingEnemy);
 
-        muerto = ! collidingPixElement.getActualPower().checkWinner(collidingEnemy);
 
+        if (dead){
 
-        if (muerto){
-
+            //God has just saved your live, pixElement had a shield. Ehmmm... no longer does.
             if(shield){
-                muerto = false;
+                dead = false;
                 
                 sound.shieldOff();
-                
 
                 game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+game.pixElement.getActualPower().texture));
 
-                //get some extra time so you can really escape from the enemy
+                //Get some extra time so you can really escape from the enemy
                 setTimeout(function () {
-                    console.log("fuera escudo");
                     shield = false;
-
-
-                },500);
+                }, params.shieldOffTime);
                 return;
             }
 
             var meters = bodyA.GetPosition().x.toFixed(2);
 
-            console.error("muerto a los " + meters + " metros");
-            console.error("killed by an evil " + collidingEnemy.name );
-
-            $(".result").html("Dead at " + meters + " meters\n"
-                + "killed by an evil " + collidingEnemy.name + "\n"
-                + "with a total of " + points + " points");
-            console.log(world);
-
-            if(points < 1)
-                $(".result").append("<p>Achivement: dead at first pixel, uuugh meaned sight.</p>");
-
-            $(".new-game").show();
-
-              // save canvas image as data url (png format by default)
-
-      /*var canvas = document.getElementById('game-canvas', {preserveDrawingBuffer: true});
-      var dataURL = canvas.toDataURL();
-
-      // set canvasImg image src to dataURL
-      // so it can be saved as an image
-      document.getElementById('canvasImg').src = dataURL;*/
+            $(".result").html("Dead at <a href='#'>" + meters + " meters</a>\n"
+                + "killed by an evil <a href='#'>" + collidingEnemy.name + "</a>\n"
+                + "with a total of <a href='#'>" + points + " points</a>.");
             
+            /*console.log(world);*/
+            
+            //Show the gui element for the game over event
+            $("#end-game").slideDown();
+
+
+            //Simple achivement, achivement module integration pendding
+            if(points < 1)
+                $("#achivement").slideDown();
+
+            //Active again the new game button
+            $(".new-game").removeClass("disabled");
+
+              /*//TODO screen captures*/
+
+              /*save canvas image as data url (png format by default)*/
+
+              /*var canvas = document.getElementById('game-canvas', {preserveDrawingBuffer: true});
+              var dataURL = canvas.toDataURL();
+
+              set canvasImg image src to dataURL
+              so it can be saved as an image
+              document.getElementById('canvasImg').src = dataURL;*/
+                        
+
+            //Play Game Over sound
             sound.endGame();
 
 
             localStorage.playedGames++;
+
+            //Check wether ther's a new local record
             if(localStorage.points < points){
 
                 actualPlayer = localStorage.player;
 
-                var player = prompt("New Record! \nPlease enter your name",actualPlayer);
+                var player = prompt("New local record! \nPlease enter your name", actualPlayer);
 
                 localStorage.points = points;
                 localStorage.player = player;
                 localStorage.meters = meters;
 
-                $(".result").append("<p>New Record: " +localStorage.player + ": " + localStorage.points + " points, "
-        + localStorage.meters + " meters</p>");
+                $(".result").append("<p><strong>New local record!</strong> " +localStorage.player + " has earned <a href='#'>" + localStorage.points + " points</a> and ran <a href='#'>"
+                                    + localStorage.meters + " meters</a>.</p>");
 
             }
 
+            //Send score to the server
+            sendScore({player:localStorage.player, points:points, meters:meters});
+            $(".player").html(localStorage.player);
 
+            //Emit end game event to the controllers: handhelds and tablets
             emitEndGame(points, meters);
 
         }
@@ -232,104 +209,74 @@ function start(){
 
             sound.touch();
 
-            $(".result").html(points);
+            $(".points").html(points);
         }
 
 
     }
+    //Other collision events
     listener.EndContact = function(contact) {
-        // //console.log(contact.GetFixtureA().GetBody().GetUserData());
-        //console.log("EndContact");
 
     }
     listener.PostSolve = function(contact, impulse) {
-        //console.log("PostSolve");
         
     }
     listener.PreSolve = function(contact, oldManifold) {
-        //console.log("PreSolve");
 
     }
+    //Attach the contact listener to our world
     world.world.SetContactListener(listener);
 
-    // create an new instance of a pixi stage
+
+    //Create an new instance of a pixi stage
     var stage = new PIXI.Stage(0x3333333, true),
     containerDisplay = new PIXI.DisplayObjectContainer();
     
     stage.addChild(containerDisplay);
 
-    // create a renderer instance
+    //Create a renderer instance
     var renderer = PIXI.autoDetectRenderer(STAGE_WIDTH, STAGE_HEIGHT, null);
     
     renderer.view.id="game-canvas";
-    // add the renderer view element to the DOM
-    document.body.appendChild(renderer.view);
+    //Add the renderer view element to the DOM
+    document.getElementById("game-canvas-wrapper").appendChild(renderer.view);
 
-console.log(document.getElementById("game-canvas"))
-    
+
+    //Request Animation Frame allows an optimal call of update() function. 
+    //Is used instead of the clasical timeout or the manual setup to 60 calls per second, 
+    //and relays in the browser for obtaining the best possible performance.
     requestAnimFrame( update );
     
-    // create a texture from an image path
-    //var texture = PIXI.Texture.fromImage("assets/bunny.png");
-    // create a new Sprite using the texture
-    //var bunny = new PIXI.Sprite(texture);
-    
-    //var bunny = pU.createBox("");
-
-    //var bunny = new PixiBox();
-
-    //bunny.createBox(containerDisplay);
 
     var texture = PIXI.Texture.fromImage("assets/b3.png");
 
+    //Adds a linear velocity equal to parV to the body in the x axis for a horizontal movement
     function addVel(body, parV){
-        var b = body;
-        var v = b.GetLinearVelocity();
-    
-        var vel = new b2Vec2(1,0);
+        var b = body,
+            v = b.GetLinearVelocity(),
+            vel = new b2Vec2(1,0);
+        
         v.Add(vel);
-        
-        if(Math.abs(v.y) > this.max_ver_vel)
-        {
-            v.y = this.max_ver_vel * v.y/Math.abs(v.y);
-        }
-        
-        if(Math.abs(v.x) > this.max_hor_vel)
-        {
-            v.x = this.max_hor_vel * v.x/Math.abs(v.x);
-        }
-
         v.x = parV;
-        
         b.SetLinearVelocity(v);
     };
 
-    function addJump(body, jump) {
 
-        var b = body;
-        var v = b.GetLinearVelocity();
-    
-        var vel = new b2Vec2(1,0);
+    //Adds a linear velocity equal to parV to the body in the y axis for a vertical jump
+    function addJump(body, parV) {
+
+        var b = body,
+            v = b.GetLinearVelocity(),
+            vel = new b2Vec2(1,0);
+        
         v.Add(vel);
-        
-        if(Math.abs(v.y) > this.max_ver_vel)
-        {
-            v.y = this.max_ver_vel * v.y/Math.abs(v.y);
-        }
-        
-        if(Math.abs(v.x) > this.max_hor_vel)
-        {
-            v.x = this.max_hor_vel * v.x/Math.abs(v.x);
-        }
-
-        v.y = jump;
-        
+        v.y = parV;
         b.SetLinearVelocity(v);
 
-    }
+    };
 
 
-
+    //Create Floor or Ceil in the position especificated by the coordenates
     function createFloor(x, y) {
 
         var suelo = world.createBox(x, y, 6, 1, {density : 5.0, type: b2Body.b2_staticBody, user_data: new Floor()});
@@ -343,31 +290,28 @@ console.log(document.getElementById("game-canvas"))
     }
 
 
+    // Set the scale of pixElement bigger than the rest
+    params.boxScale = params.pixElementScale;
 
-    var boxScale = 1.6;
-
+    // Create the rest of the objets such as: Pixelement, Enemies and Power Ups
     function createObject(x, y, texture, userData) {
 
         texture = PIXI.Texture.fromImage("assets/"+texture);
-        bunny = createBox(1, 5, boxScale*METER/100, boxScale*METER/100, texture);
+        bunny = createBox(1, 5, params.boxScale*METER/100, params.boxScale*METER/100, texture);
 
         containerDisplay.addChild(bunny);
 
 
-        var b = world.createBox(x+containerDisplay.position.x/METER * -1, y, boxScale, boxScale, {restitution : 0.0, user_data: userData});
-
-
-        //addVel(b);
+        var b = world.createBox(x+containerDisplay.position.x/METER * -1, y, params.boxScale, params.boxScale, {restitution : 0.0, user_data: userData});
 
         world.actors.addActor(b);
         world.actors.addBody(bunny);
 
         return b;
-
     }
 
     var cont = 0,
-        floorActualX = 2;
+        floorActualX = 6;
 
 
 
@@ -375,7 +319,7 @@ console.log(document.getElementById("game-canvas"))
         bluetexture = "b6.png",
         greentexture = "g7.png";
 
-    //Character
+    //Creation and adding of the main character
     var character = createObject(0.5, 5, bluetexture, game.pixElement);
 
     game.pixElement.setBody(character);
@@ -385,21 +329,34 @@ console.log(document.getElementById("game-canvas"))
 
     game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+redtexture));
 
-    boxScale = 1;
+    // Set the rest of the elements scale
+    params.boxScale = 1;
 
+    // Create several floors at the begining
     createFloor(1, 0.5);
     createFloor(7, 0.5);
+    createFloor(13, 0.5);
+    createFloor(19, 0.5);
+    createFloor(25, 0.5);
+    createFloor(31, 0.5);
 
-
+    // Create several ceils at the begining
     createFloor(1, 20);
     createFloor(7, 20);
+    createFloor(13, 20);
+    createFloor(19, 20);
+    createFloor(25, 20);
+    createFloor(31, 20);
 
-    var changeTexture = false;
+    var changeTexture = false,
+        $bar = $('#lvl-bar');
 
-
+    // Start sound
     sound.startGame();
     
     var oldtime = new Date;
+
+    // Used to update the world
 	function update(time)
 	{
 
@@ -407,39 +364,32 @@ console.log(document.getElementById("game-canvas"))
 
         cont++;
 
-        if(!muerto)
-
+        // Need to update only if not dead
+        if(!dead)
             requestAnimFrame(update);
 
+        // Establish the fps used in the rest of the operations
         fps = 1000/(time-oldtime);
         oldtime = time;
-
-
         params.fps = fps;
 
-/*
 
-        if(bun && changeTexture != "bunny"){
-
-            charPixi.setTexture(PIXI.Texture.fromImage("assets/"+redtexture));
-
-            changeTexture = "bunny";
-        }
-        else if (!bun && changeTexture != "box"){
-            charPixi.setTexture(PIXI.Texture.fromImage("assets/"+bluetexture));
-            changeTexture = "box";
-
-        }
-*/
-
-
-
+        //Create enemies at a rate modified by params.difficulty
         if(cont%(Math.round(60/params.difficulty))==0){
-        //if(cont%(60/8)==0){
+           
+           // Change color of difficulty var
+            var barPercent = params.difficulty*100/params.maxDifficulty;
+            $bar.width(barPercent+"%");
 
-            $(".difficulty").html(Math.ceil(params.difficulty/params.difficultyFactor) + " lvl");
+            if(barPercent > 33 && barPercent < 66){
+                $bar.removeClass("progress-bar-success").addClass("progress-bar-info");
+            }
+            else if(barPercent > 66){
+                $bar.removeClass("progress-bar-info").addClass("progress-bar-danger");
+            }
 
-
+            /*FIXME*/
+            // Creation of different powers enemies
             var texture = bluetexture,
                 enemy = null;
             
@@ -459,6 +409,7 @@ console.log(document.getElementById("game-canvas"))
                 enemy = new BluePower();
             }
 
+            // Creates enemies at different positions
             createObject(Math.random()*16 + 10, Math.random()*19 + 3, texture, enemy);
 
             if(Math.random()<0.1)
@@ -467,48 +418,47 @@ console.log(document.getElementById("game-canvas"))
         }
 
 
-        //if((containerDisplay.position.x/METER + STAGE_WIDTH) < floorActualX*6){
-        if(cont%(60/2)==0){
+
+        /*console.log(Math.floor(containerDisplay.position.x-STAGE_WIDTH));
+        if(Math.floor(containerDisplay.position.x-STAGE_WIDTH)%STAGE_WIDTH == 0){
+        */
+        // The rate of the floor and ceil creation
+        if(cont%(60/1)==0){
             createFloor(floorActualX*6+1, 0.5);
             createFloor(floorActualX*6+1, 20);
             createFloor(floorActualX*6+1, Math.random()*10+5);
             floorActualX++;
         }
 
+        /*createFloor(containerDisplay.position.x*6+1*-1, 0.5);
+        createFloor(containerDisplay.position.x*6+1*-1, 20);
+        createFloor(containerDisplay.position.x*6+1*-1, Math.random()*10+5);*/
 
-        
-        //world.world.Step(1 / 60,  3,  3);
-        //world.world.ClearForces();
-        
+        //The world steps at the same frame rate as the fps given by requestAnimFrame        
         world.world.Step(1 / fps*2,  8,  3);
         world.world.ClearForces();
         
         const n = world.actors.actors.length;
+
+        //iterate through actors and get their positions updated from the physics engine
         for (var i = 0; i < n; i++)
         {
             var body  = world.actors.bodies[i];
 
             if(body === undefined) continue;
-
             
-            var actor = world.actors.actors[i];
-            
-            //if(actor.GetUserData() instanceof Floor) continue;
-
-
-
-            var position = actor.GetPosition();
+            var actor = world.actors.actors[i],
+                position = actor.GetPosition();
 
             body.position.x = position.x * METER;
             body.position.y = (STAGE_HEIGHT - position.y * METER);
             body.rotation = -1 * actor.GetAngle();
 
 
-
-        if( actor.GetUserData() != 0){}
+            //Optimization of actors: if the actor has passed the 
+            //left of the screen and is not visible, destroy it.
             if(position.x + 10 < character.GetPosition().x){
                 world.world.DestroyBody(actor);
-
                 world.actors.actors.splice(i,1);
                 world.actors.bodies.splice(i,1);
             }
@@ -517,74 +467,45 @@ console.log(document.getElementById("game-canvas"))
 
         var position = character.GetPosition();
         
-        world.actors.bodies[0].alpha = 1;
-
         //set difficulty
         //difficulty = Math.round(position.x/params.difficultyFactor);
-        params.difficulty = position.x/params.difficultyFactor + 3;
+        if(params.difficulty < params.maxDifficulty)
+            params.difficulty = position.x/params.difficultyFactor + 3;
 
 
-   
-        //if(position.x*METER+containerDisplay.position.x < METER){
-          //  addVel(character, 0.267*4);
-        //}
-        //else{
-            addVel(character, 0.267*10);
-        //}
+        //make the character run
+        addVel(character, 0.267*10);
 
         if (jump){
             addJump(character, 5);
             jump = false;
         }
 
-        if(MOVEX)
-            containerDisplay.position.x = position.x*METER*-1 + CHAR_OFFSET;
+        //update the position of the screen to the position of the character plus a given offset
+        containerDisplay.position.x = position.x*METER*-1 + CHAR_OFFSET;
 
-
-        //console.log(position.x*METER);
-        //console.log(containerDisplay.position.x);
-        
+        //call method render from Pixi
         renderer.render(stage);
-        //stats.update();
 
 	}
 
-
-
-
-    //console.log(world);
-
-
-
-//var world;
-
-
 }
-//)();
-
-
-
-
-
-
-
 
 $(function(){
 
-    $(".new-game").hide();
+    $(".new-game").addClass("disabled");
+    $(".alert").hide();
 
 
     $(document).keydown(function(e){
         
-        //console.log(e.keyCode);
-        
-        //esc for reloading
+        //Esc for reloading
         if(e.keyCode == 27){
             document.location.reload(true)
             return false;
         }
         
-        //enter for changing color
+        //Enter key for changing color
         if(e.keyCode == 13){
             changeElement();
             return false;
@@ -605,13 +526,12 @@ $(function(){
     });
     
 
+    // Left click for changing color
     $(document).mousedown(function(e){
         changeElement();
     });
 
-
-
-
+    // Default values for local storage
     if(localStorage.points === undefined){
         localStorage.points = 0;
         localStorage.meters = 0;
@@ -619,34 +539,62 @@ $(function(){
         localStorage.player = "Player";
     }
 
+    // Load saved player name from local storage into the gui
+    $(".player").html(localStorage.player);
 
-
-    $(".record").html("Last Record: " +localStorage.player + ": " + localStorage.points + " points, "
-        + localStorage.meters + " meters");
+    /*$(".record").html("Last Record: " +localStorage.player + ": " + localStorage.points + " points, "
+        + localStorage.meters + " meters");*/
 
 });
 
-
+// Used to change our element to the next one
 function changeElement () {
-    bun = !bun;
 
     var nextPower = game.pixElement.nextPower(),
         shieldTexture;
-    //console.log(nextPower);
 
+    // Check if shields textures shall be loaded
     if(shield)
         shieldTexture = "shields/"
     else
         shieldTexture = "";
-    //console.log(nextPower.texture);
 
-//game.world.SetGravity( new b2Vec2(-1 * (Math.random() * 10), -1 * (Math.random() * 10)) );
-
+    /*game.world.SetGravity( new b2Vec2(-1 * (Math.random() * 10), -1 * (Math.random() * 10)) );*/
     game.pixElement.representation.setTexture(PIXI.Texture.fromImage("assets/"+shieldTexture+nextPower.texture));
 
     return false;
 }
 
+// Makes the character jump
 function jump () {
     jump = true;
+}
+
+//Sends the score via ajax
+function sendScore (score) {
+     
+    $.ajax({
+        url : "http://localhost:8089/api/score",
+        type: "POST",
+        data : score,
+        success: function(data, textStatus, jqXHR)
+        {
+            console.log(data);
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            console.log(errorThrown);
+        }
+    });
+}
+
+
+//Opens a popup and sets the current player name to the one given
+function changePlayerName () {
+    var player = prompt("New player! \nPlease enter your name");
+
+    localStorage.player = player;
+
+    $(".player").html(localStorage.player);
+
 }

@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>main.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="debugdraw.html">
+                debugdraw.js
+              </a>
+            
+              
+              <a class="source" href="funciones.html">
+                funciones.js
+              </a>
+            
+              
+              <a class="source" href="main.html">
+                main.js
+              </a>
+            
+              
+              <a class="source" href="sound.html">
+                sound.js
+              </a>
+            
+              
+              <a class="source" href="tech.html">
+                tech.js
+              </a>
+            
+              
+              <a class="source" href="world.html">
+                world.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>main.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>General conditions in the game</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> jump = <span class="literal">false</span>,
+    dead = <span class="literal">false</span>;
+    game = <span class="literal">null</span>,
+    points = <span class="number">0</span>,
+    shield = <span class="literal">false</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>Params used in some operations</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> params = {
+    difficultyFactor: <span class="number">20</span>,
+    difficulty: <span class="number">1</span>,
+    maxDifficulty: <span class="number">35</span>,
+    fps:<span class="number">0</span>,
+    pixElementScale: <span class="number">1.6</span>,
+    boxScale: <span class="number">1</span>,
+    shieldOffTime: <span class="number">500</span>
+};</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Get the sound module into action</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> sound = <span class="keyword">new</span> SoundModule({onLoadEnd: onSoundLoaded});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>Assets graphics preloader</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">const</span> loader = <span class="keyword">new</span> PIXI.AssetLoader([<span class="string">"assets/b6.png"</span>,
+                                     <span class="string">"assets/g7.png"</span>,
+                                     <span class="string">"assets/r7.png"</span>,
+                                     <span class="string">"assets/w1.png"</span>,
+                                     <span class="string">"assets/shields/b6.png"</span>,
+                                     <span class="string">"assets/shields/g7.png"</span>,
+                                     <span class="string">"assets/shields/r7.png"</span>,
+                                     <span class="string">"assets/floor2.png"</span>]);
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">onSoundLoaded</span> <span class="params">(argument)</span> {</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>When every sound is loaded use callback to start loading assest</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    loader.onComplete = onAssetsLoaded;
+    loader.load();
+}
+    
+<span class="function"><span class="keyword">function</span> <span class="title">onAssetsLoaded</span> <span class="params">(argument)</span> {</span>
+
+    start();
+}
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">start</span><span class="params">()</span>{</span>
+
+
+    <span class="keyword">var</span> bU = <span class="keyword">new</span> Box2DUtils(),
+        pU = <span class="keyword">new</span> PixiUtils();
+
+    <span class="comment">/*const STAGE_WIDTH = window.innerWidth, STAGE_HEIGHT = window.innerHeight;*/</span>
+    <span class="keyword">const</span> STAGE_WIDTH = <span class="number">640</span>, STAGE_HEIGHT = <span class="number">480</span>;
+    <span class="keyword">const</span> METER = <span class="number">23.4</span>;
+    <span class="keyword">const</span> CHAR_OFFSET = <span class="number">3</span>*METER;
+    <span class="keyword">const</span> DEBUG = <span class="literal">true</span>;
+
+
+    <span class="keyword">var</span> world = <span class="keyword">new</span> PixelWorld();
+    game = world;
+
+    <span class="keyword">var</span> listener = <span class="keyword">new</span> Box2D.Dynamics.b2ContactListener;
+    listener.BeginContact = <span class="function"><span class="keyword">function</span><span class="params">(contact)</span> {</span>
+
+        <span class="keyword">var</span> collidingPixElement,
+            collidingEnemy;
+
+        <span class="keyword">if</span> (dead)
+            <span class="keyword">return</span>;
+
+
+        <span class="keyword">var</span> bodyA = contact.GetFixtureA().GetBody(),
+            bodyB = contact.GetFixtureB().GetBody(),
+            bodyAUserData = bodyA.GetUserData(),
+            bodyBUserData = bodyB.GetUserData();
+
+
+        <span class="comment">/*FIXME insert BULLET MODE*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>Ignore the Floor</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(bodyAUserData <span class="keyword">instanceof</span> Floor || bodyBUserData <span class="keyword">instanceof</span> Floor)
+            <span class="keyword">return</span>;
+
+
+        <span class="comment">/*Ignore all but PixElement collisions
+        no longer used
+        if (!(bodyAUserData instanceof PixElement) &amp;&amp; (!(bodyBUserData instanceof PixElement)))
+            return;*/</span>
+
+
+        <span class="comment">/*TODO get powers of enemies and check enemys power: something like enemy.getPower()*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>is PixElement the body A?</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span> ((bodyAUserData <span class="keyword">instanceof</span> PixElement) &amp;&amp; ((bodyBUserData <span class="keyword">instanceof</span> Power))) {
+
+            collidingPixElement = bodyAUserData;
+            collidingEnemy = bodyBUserData;
+
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>is PixElement the body B?</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">else</span> <span class="keyword">if</span> ((bodyBUserData <span class="keyword">instanceof</span> PixElement) &amp;&amp; ((bodyAUserData <span class="keyword">instanceof</span> Power))) {
+            
+            collidingPixElement = bodyBUserData;
+            collidingEnemy = bodyAUserData;
+        
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>If PixElement and a Power are not involved in the collision
+we are not interested in the collision</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">else</span> {
+            <span class="keyword">return</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>If the Power is a PowerUp set it as active</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(collidingEnemy <span class="keyword">instanceof</span> PowerUp){
+
+            sound.shieldOn();
+
+            shield = <span class="literal">true</span>;
+            game.pixElement.representation.setTexture(PIXI.Texture.fromImage(<span class="string">"assets/shields/"</span>+game.pixElement.getActualPower().texture));
+
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Check whether the actual element kills or not pixElement</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        dead = ! collidingPixElement.getActualPower().checkWinner(collidingEnemy);
+
+
+        <span class="keyword">if</span> (dead){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>God has just saved your live, pixElement had a shield. Ehmmm... no longer does.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(shield){
+                dead = <span class="literal">false</span>;
+                
+                sound.shieldOff();
+
+                game.pixElement.representation.setTexture(PIXI.Texture.fromImage(<span class="string">"assets/"</span>+game.pixElement.getActualPower().texture));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Get some extra time so you can really escape from the enemy</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>                setTimeout(<span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+                    shield = <span class="literal">false</span>;
+                }, params.shieldOffTime);
+                <span class="keyword">return</span>;
+            }
+
+            <span class="keyword">var</span> meters = bodyA.GetPosition().x.toFixed(<span class="number">2</span>);
+
+            $(<span class="string">".result"</span>).html(<span class="string">"Dead at &lt;a href='#'&gt;"</span> + meters + <span class="string">" meters&lt;/a&gt;\n"</span>
+                + <span class="string">"killed by an evil &lt;a href='#'&gt;"</span> + collidingEnemy.name + <span class="string">"&lt;/a&gt;\n"</span>
+                + <span class="string">"with a total of &lt;a href='#'&gt;"</span> + points + <span class="string">" points&lt;/a&gt;."</span>);
+            
+            <span class="comment">/*console.log(world);*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Show the gui element for the game over event</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            $(<span class="string">"#end-game"</span>).slideDown();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>Simple achivement, achivement module integration pendding</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(points &lt; <span class="number">1</span>)
+                $(<span class="string">"#achivement"</span>).slideDown();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>Active again the new game button</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            $(<span class="string">".new-game"</span>).removeClass(<span class="string">"disabled"</span>);
+
+              <span class="comment">/*//TODO screen captures*/</span>
+
+              <span class="comment">/*save canvas image as data url (png format by default)*/</span>
+
+              <span class="comment">/*var canvas = document.getElementById('game-canvas', {preserveDrawingBuffer: true});
+              var dataURL = canvas.toDataURL();
+
+              set canvasImg image src to dataURL
+              so it can be saved as an image
+              document.getElementById('canvasImg').src = dataURL;*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>Play Game Over sound</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            sound.endGame();
+
+
+            localStorage.playedGames++;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>Check wether ther&#39;s a new local record</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(localStorage.points &lt; points){
+
+                actualPlayer = localStorage.player;
+
+                <span class="keyword">var</span> player = prompt(<span class="string">"New local record! \nPlease enter your name"</span>, actualPlayer);
+
+                localStorage.points = points;
+                localStorage.player = player;
+                localStorage.meters = meters;
+
+                $(<span class="string">".result"</span>).append(<span class="string">"&lt;p&gt;&lt;strong&gt;New local record!&lt;/strong&gt; "</span> +localStorage.player + <span class="string">" has earned &lt;a href='#'&gt;"</span> + localStorage.points + <span class="string">" points&lt;/a&gt; and ran &lt;a href='#'&gt;"</span>
+                                    + localStorage.meters + <span class="string">" meters&lt;/a&gt;.&lt;/p&gt;"</span>);
+
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>Send score to the server</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            sendScore({player:localStorage.player, points:points, meters:meters});
+            $(<span class="string">".player"</span>).html(localStorage.player);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>Emit end game event to the controllers: handhelds and tablets</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            emitEndGame(points, meters);
+
+        }
+        <span class="keyword">else</span>{
+            points++;
+
+
+            sound.touch();
+
+            $(<span class="string">".points"</span>).html(points);
+        }
+
+
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>Other collision events</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    listener.EndContact = <span class="function"><span class="keyword">function</span><span class="params">(contact)</span> {</span>
+
+    }
+    listener.PostSolve = <span class="function"><span class="keyword">function</span><span class="params">(contact, impulse)</span> {</span>
+        
+    }
+    listener.PreSolve = <span class="function"><span class="keyword">function</span><span class="params">(contact, oldManifold)</span> {</span>
+
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>Attach the contact listener to our world</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    world.world.SetContactListener(listener);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>Create an new instance of a pixi stage</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> stage = <span class="keyword">new</span> PIXI.Stage(<span class="number">0x3333333</span>, <span class="literal">true</span>),
+    containerDisplay = <span class="keyword">new</span> PIXI.DisplayObjectContainer();
+    
+    stage.addChild(containerDisplay);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Create a renderer instance</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> renderer = PIXI.autoDetectRenderer(STAGE_WIDTH, STAGE_HEIGHT, <span class="literal">null</span>);
+    
+    renderer.view.id=<span class="string">"game-canvas"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>Add the renderer view element to the DOM</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    document.getElementById(<span class="string">"game-canvas-wrapper"</span>).appendChild(renderer.view);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>Request Animation Frame allows an optimal call of update() function. 
+Is used instead of the clasical timeout or the manual setup to 60 calls per second, 
+and relays in the browser for obtaining the best possible performance.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    requestAnimFrame( update );
+    
+
+    <span class="keyword">var</span> texture = PIXI.Texture.fromImage(<span class="string">"assets/b3.png"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Adds a linear velocity equal to parV to the body in the x axis for a horizontal movement</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">addVel</span><span class="params">(body, parV)</span>{</span>
+        <span class="keyword">var</span> b = body,
+            v = b.GetLinearVelocity(),
+            vel = <span class="keyword">new</span> b2Vec2(<span class="number">1</span>,<span class="number">0</span>);
+        
+        v.Add(vel);
+        v.x = parV;
+        b.SetLinearVelocity(v);
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Adds a linear velocity equal to parV to the body in the y axis for a vertical jump</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">addJump</span><span class="params">(body, parV)</span> {</span>
+
+        <span class="keyword">var</span> b = body,
+            v = b.GetLinearVelocity(),
+            vel = <span class="keyword">new</span> b2Vec2(<span class="number">1</span>,<span class="number">0</span>);
+        
+        v.Add(vel);
+        v.y = parV;
+        b.SetLinearVelocity(v);
+
+    };</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>Create Floor or Ceil in the position especificated by the coordenates</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createFloor</span><span class="params">(x, y)</span> {</span>
+
+        <span class="keyword">var</span> suelo = world.createBox(x, y, <span class="number">6</span>, <span class="number">1</span>, {density : <span class="number">5.0</span>, type: b2Body.b2_staticBody, user_data: <span class="keyword">new</span> Floor()});
+        <span class="keyword">var</span> texture = PIXI.Texture.fromImage(<span class="string">"assets/floor2.png"</span>);
+
+        sueloPixi = createBox(x, y, <span class="number">3</span>*METER/<span class="number">100</span>, <span class="number">2</span>*METER/<span class="number">100</span>, texture);
+
+        world.actors.actors.push(suelo);
+        world.actors.bodies.push(sueloPixi);
+        containerDisplay.addChild(sueloPixi);
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>Set the scale of pixElement bigger than the rest</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    params.boxScale = params.pixElementScale;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>Create the rest of the objets such as: Pixelement, Enemies and Power Ups</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="keyword">function</span> <span class="title">createObject</span><span class="params">(x, y, texture, userData)</span> {</span>
+
+        texture = PIXI.Texture.fromImage(<span class="string">"assets/"</span>+texture);
+        bunny = createBox(<span class="number">1</span>, <span class="number">5</span>, params.boxScale*METER/<span class="number">100</span>, params.boxScale*METER/<span class="number">100</span>, texture);
+
+        containerDisplay.addChild(bunny);
+
+
+        <span class="keyword">var</span> b = world.createBox(x+containerDisplay.position.x/METER * -<span class="number">1</span>, y, params.boxScale, params.boxScale, {restitution : <span class="number">0.0</span>, user_data: userData});
+
+        world.actors.addActor(b);
+        world.actors.addBody(bunny);
+
+        <span class="keyword">return</span> b;
+    }
+
+    <span class="keyword">var</span> cont = <span class="number">0</span>,
+        floorActualX = <span class="number">6</span>;
+
+
+
+    <span class="keyword">var</span> redtexture = <span class="string">"r7.png"</span>,
+        bluetexture = <span class="string">"b6.png"</span>,
+        greentexture = <span class="string">"g7.png"</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>Creation and adding of the main character</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">var</span> character = createObject(<span class="number">0.5</span>, <span class="number">5</span>, bluetexture, game.pixElement);
+
+    game.pixElement.setBody(character);
+    <span class="keyword">var</span> charPixi = world.actors.bodies[<span class="number">0</span>];
+    game.pixElement.setRepresentation(charPixi);
+
+
+    game.pixElement.representation.setTexture(PIXI.Texture.fromImage(<span class="string">"assets/"</span>+redtexture));</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>Set the rest of the elements scale</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    params.boxScale = <span class="number">1</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>Create several floors at the begining</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    createFloor(<span class="number">1</span>, <span class="number">0.5</span>);
+    createFloor(<span class="number">7</span>, <span class="number">0.5</span>);
+    createFloor(<span class="number">13</span>, <span class="number">0.5</span>);
+    createFloor(<span class="number">19</span>, <span class="number">0.5</span>);
+    createFloor(<span class="number">25</span>, <span class="number">0.5</span>);
+    createFloor(<span class="number">31</span>, <span class="number">0.5</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>Create several ceils at the begining</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    createFloor(<span class="number">1</span>, <span class="number">20</span>);
+    createFloor(<span class="number">7</span>, <span class="number">20</span>);
+    createFloor(<span class="number">13</span>, <span class="number">20</span>);
+    createFloor(<span class="number">19</span>, <span class="number">20</span>);
+    createFloor(<span class="number">25</span>, <span class="number">20</span>);
+    createFloor(<span class="number">31</span>, <span class="number">20</span>);
+
+    <span class="keyword">var</span> changeTexture = <span class="literal">false</span>,
+        $bar = $(<span class="string">'#lvl-bar'</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>Start sound</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    sound.startGame();
+    
+    <span class="keyword">var</span> oldtime = <span class="keyword">new</span> Date;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>Used to update the world</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="function"><span class="keyword">function</span> <span class="title">update</span><span class="params">(time)</span>
+	{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>stats.begin();</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        cont++;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>Need to update only if not dead</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(!dead)
+            requestAnimFrame(update);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>Establish the fps used in the rest of the operations</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        fps = <span class="number">1000</span>/(time-oldtime);
+        oldtime = time;
+        params.fps = fps;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>Create enemies at a rate modified by params.difficulty</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(cont%(Math.round(<span class="number">60</span>/params.difficulty))==<span class="number">0</span>){</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>Change color of difficulty var</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> barPercent = params.difficulty*<span class="number">100</span>/params.maxDifficulty;
+            $bar.width(barPercent+<span class="string">"%"</span>);
+
+            <span class="keyword">if</span>(barPercent &gt; <span class="number">33</span> &amp;&amp; barPercent &lt; <span class="number">66</span>){
+                $bar.removeClass(<span class="string">"progress-bar-success"</span>).addClass(<span class="string">"progress-bar-info"</span>);
+            }
+            <span class="keyword">else</span> <span class="keyword">if</span>(barPercent &gt; <span class="number">66</span>){
+                $bar.removeClass(<span class="string">"progress-bar-info"</span>).addClass(<span class="string">"progress-bar-danger"</span>);
+            }
+
+            <span class="comment">/*FIXME*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>Creation of different powers enemies</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">var</span> texture = bluetexture,
+                enemy = <span class="literal">null</span>;
+            
+            <span class="keyword">var</span> rndTexture = Math.random();
+
+            <span class="keyword">if</span>( rndTexture &lt; <span class="number">0.3</span>){
+                texture = redtexture;
+                enemy = <span class="keyword">new</span> RedPower();
+
+            }
+            <span class="keyword">else</span> <span class="keyword">if</span>(rndTexture &gt;= <span class="number">0.3</span> &amp;&amp; rndTexture &lt; <span class="number">0.6</span>){
+                texture = greentexture;
+                enemy = <span class="keyword">new</span> GreenPower();
+
+            }
+            <span class="keyword">else</span>{
+                enemy = <span class="keyword">new</span> BluePower();
+            }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <p>Creates enemies at different positions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            createObject(Math.random()*<span class="number">16</span> + <span class="number">10</span>, Math.random()*<span class="number">19</span> + <span class="number">3</span>, texture, enemy);
+
+            <span class="keyword">if</span>(Math.random()&lt;<span class="number">0.1</span>)
+                createObject(Math.random()*<span class="number">16</span> + <span class="number">10</span>, Math.random()*<span class="number">19</span> + <span class="number">3</span>, <span class="string">"w1.png"</span>, <span class="keyword">new</span> PowerUp());
+
+        }
+
+
+
+        <span class="comment">/*console.log(Math.floor(containerDisplay.position.x-STAGE_WIDTH));
+        if(Math.floor(containerDisplay.position.x-STAGE_WIDTH)%STAGE_WIDTH == 0){
+        */</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              <p>The rate of the floor and ceil creation</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(cont%(<span class="number">60</span>/<span class="number">1</span>)==<span class="number">0</span>){
+            createFloor(floorActualX*<span class="number">6</span>+<span class="number">1</span>, <span class="number">0.5</span>);
+            createFloor(floorActualX*<span class="number">6</span>+<span class="number">1</span>, <span class="number">20</span>);
+            createFloor(floorActualX*<span class="number">6</span>+<span class="number">1</span>, Math.random()*<span class="number">10</span>+<span class="number">5</span>);
+            floorActualX++;
+        }
+
+        <span class="comment">/*createFloor(containerDisplay.position.x*6+1*-1, 0.5);
+        createFloor(containerDisplay.position.x*6+1*-1, 20);
+        createFloor(containerDisplay.position.x*6+1*-1, Math.random()*10+5);*/</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>The world steps at the same frame rate as the fps given by requestAnimFrame        </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        world.world.Step(<span class="number">1</span> / fps*<span class="number">2</span>,  <span class="number">8</span>,  <span class="number">3</span>);
+        world.world.ClearForces();
+        
+        <span class="keyword">const</span> n = world.actors.actors.length;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>iterate through actors and get their positions updated from the physics engine</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; n; i++)
+        {
+            <span class="keyword">var</span> body  = world.actors.bodies[i];
+
+            <span class="keyword">if</span>(body === <span class="literal">undefined</span>) <span class="keyword">continue</span>;
+            
+            <span class="keyword">var</span> actor = world.actors.actors[i],
+                position = actor.GetPosition();
+
+            body.position.x = position.x * METER;
+            body.position.y = (STAGE_HEIGHT - position.y * METER);
+            body.rotation = -<span class="number">1</span> * actor.GetAngle();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>Optimization of actors: if the actor has passed the 
+left of the screen and is not visible, destroy it.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>            <span class="keyword">if</span>(position.x + <span class="number">10</span> &lt; character.GetPosition().x){
+                world.world.DestroyBody(actor);
+                world.actors.actors.splice(i,<span class="number">1</span>);
+                world.actors.bodies.splice(i,<span class="number">1</span>);
+            }
+        }
+            
+
+        <span class="keyword">var</span> position = character.GetPosition();</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>set difficulty
+difficulty = Math.round(position.x/params.difficultyFactor);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(params.difficulty &lt; params.maxDifficulty)
+            params.difficulty = position.x/params.difficultyFactor + <span class="number">3</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>make the character run</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        addVel(character, <span class="number">0.267</span>*<span class="number">10</span>);
+
+        <span class="keyword">if</span> (jump){
+            addJump(character, <span class="number">5</span>);
+            jump = <span class="literal">false</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>update the position of the screen to the position of the character plus a given offset</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        containerDisplay.position.x = position.x*METER*-<span class="number">1</span> + CHAR_OFFSET;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>call method render from Pixi</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        renderer.render(stage);
+
+	}
+
+}
+
+$(<span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+
+    $(<span class="string">".new-game"</span>).addClass(<span class="string">"disabled"</span>);
+    $(<span class="string">".alert"</span>).hide();
+
+
+    $(document).keydown(<span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>Esc for reloading</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(e.keyCode == <span class="number">27</span>){
+            document.location.reload(<span class="literal">true</span>)
+            <span class="keyword">return</span> <span class="literal">false</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>Enter key for changing color</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">if</span>(e.keyCode == <span class="number">13</span>){
+            changeElement();
+            <span class="keyword">return</span> <span class="literal">false</span>;
+        }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>any key for jumping</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        jump = <span class="literal">true</span>;
+
+        <span class="keyword">return</span> <span class="literal">false</span>;
+    });
+     
+    $(document).keyup(<span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>console.log(e.keyCode);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        jump = <span class="literal">false</span>;
+
+        <span class="keyword">return</span> <span class="literal">false</span>;
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>Left click for changing color</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $(document).mousedown(<span class="function"><span class="keyword">function</span><span class="params">(e)</span>{</span>
+        changeElement();
+    });</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>Default values for local storage</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(localStorage.points === <span class="literal">undefined</span>){
+        localStorage.points = <span class="number">0</span>;
+        localStorage.meters = <span class="number">0</span>;
+        localStorage.playedGames = <span class="number">0</span>;
+        localStorage.player = <span class="string">"Player"</span>;
+    }</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>Load saved player name from local storage into the gui</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    $(<span class="string">".player"</span>).html(localStorage.player);
+
+    <span class="comment">/*$(".record").html("Last Record: " +localStorage.player + ": " + localStorage.points + " points, "
+        + localStorage.meters + " meters");*/</span>
+
+});</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>Used to change our element to the next one</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">changeElement</span> <span class="params">()</span> {</span>
+
+    <span class="keyword">var</span> nextPower = game.pixElement.nextPower(),
+        shieldTexture;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>Check if shields textures shall be loaded</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span>(shield)
+        shieldTexture = <span class="string">"shields/"</span>
+    <span class="keyword">else</span>
+        shieldTexture = <span class="string">""</span>;
+
+    <span class="comment">/*game.world.SetGravity( new b2Vec2(-1 * (Math.random() * 10), -1 * (Math.random() * 10)) );*/</span>
+    game.pixElement.representation.setTexture(PIXI.Texture.fromImage(<span class="string">"assets/"</span>+shieldTexture+nextPower.texture));
+
+    <span class="keyword">return</span> <span class="literal">false</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>Jump</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">jump</span> <span class="params">()</span> {</span>
+    jump = <span class="literal">true</span>;
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>Sends the score via ajax</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">sendScore</span> <span class="params">(score)</span> {</span>
+     
+    $.ajax({
+        url : <span class="string">"http://localhost:8089/api/score"</span>,
+        type: <span class="string">"POST"</span>,
+        data : score,
+        success: <span class="function"><span class="keyword">function</span><span class="params">(data, textStatus, jqXHR)</span>
+        {</span>
+            console.log(data);
+        },
+        error: <span class="function"><span class="keyword">function</span> <span class="params">(jqXHR, textStatus, errorThrown)</span>
+        {</span>
+            console.log(errorThrown);
+        }
+    });
+}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>Opens a popup and sets the current player name to the one given</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">function</span> <span class="title">changePlayerName</span> <span class="params">()</span> {</span>
+    <span class="keyword">var</span> player = prompt(<span class="string">"New player! \nPlease enter your name"</span>);
+
+    localStorage.player = player;
+
+    $(<span class="string">".player"</span>).html(localStorage.player);
+
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

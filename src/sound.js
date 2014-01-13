@@ -1,20 +1,22 @@
-// #sound.js
-//
-
-
+// This library uses howler.js api for the reproduction of the sounds in Pixelement
 
 var loadedSounds = 0;
 
+
+// Constructor
+// ------------------------
 var SoundModule = function (opts) {
 
-
+	// Relative path to the sound assets.
 	const path = "./assets/sound/";
 
+	// Background sound playing continuosly
 	this.backgroundSound = new Howl({
 		urls: [ path+'loop1.mp3'],
 	  	onload: this.loadProgress,
-		loop: true
+		loop: true,
 	});
+ 
 
 	this.deadSound = new Howl({
 	  urls: [ path+'dead1.mp3'],
@@ -46,7 +48,6 @@ var SoundModule = function (opts) {
 	  	onend: function (){
 			setTimeout(function(){
 				this.shieldSoundIsPlaying = false;
-				console.log("soundend");
 			}, 1000);
 	  	}
 	});
@@ -60,8 +61,6 @@ var SoundModule = function (opts) {
 		loop: true
 	});*/
 
-
-	//TODO
 	/*this.sounds = 3;
 
 	this.loadedSounds = 0;
@@ -73,6 +72,9 @@ var SoundModule = function (opts) {
 		
 };
 
+// Methods of the class
+// --------------------
+// Loader. Check if all sounds have been loaded.
 SoundModule.prototype.loadProgress = function (argument) {
 
 	loadedSounds++;
@@ -82,6 +84,8 @@ SoundModule.prototype.loadProgress = function (argument) {
 	}
 }
 
+
+// Functions used for concrete events in the game. The name of the method are auto descriptive for the event they are used.
 
 SoundModule.prototype.endGame = function() {
 
@@ -101,42 +105,29 @@ SoundModule.prototype.startGame = function() {
 SoundModule.prototype.touch = function() {
 	
 
-	//this.touchSound.stop();
 	var rnd = Math.floor(Math.random() * 3);
     
-    this.touchSound.play(rnd+"");//.fade(0.1, 0.3, 500).fade(0.3, 0, 500);
+    this.touchSound.play(rnd+"");
 
 };
 
 
 SoundModule.prototype.shieldOn = function() {
 
-    //this.shieldSound.play().fade(0.2, 1, 1000);
-
-
-
 	if(this.shieldSoundIsPlaying) return;
 
     this.shieldSound.play("on", function(soundId){
-    	//console.log(soundId);
 		this.shieldSoundIsPlaying = true;
 
-	});//.fade(0.1, 0.3, 500).fade(0.3, 0, 500);
-
-
+	});
 
 };
 
 
 SoundModule.prototype.shieldOff = function() {
-    
 
-    //this.shieldSound.stop().fade(1, 0.2, 1000);
-    
-
-    
     this.shieldSound.play("off", function(soundId){
-    // do what you want with soundId
-	});//.fade(0.1, 0.3, 500).fade(0.3, 0, 500);
+
+	});
 	
 };

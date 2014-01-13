@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>funciones.js</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+      <ul id="jump_to">
+        <li>
+          <a class="large" href="javascript:void(0);">Jump To &hellip;</a>
+          <a class="small" href="javascript:void(0);">+</a>
+          <div id="jump_wrapper">
+          <div id="jump_page">
+            
+              
+              <a class="source" href="debugdraw.html">
+                debugdraw.js
+              </a>
+            
+              
+              <a class="source" href="funciones.html">
+                funciones.js
+              </a>
+            
+              
+              <a class="source" href="main.html">
+                main.js
+              </a>
+            
+              
+              <a class="source" href="sound.html">
+                sound.js
+              </a>
+            
+              
+              <a class="source" href="tech.html">
+                tech.js
+              </a>
+            
+              
+              <a class="source" href="world.html">
+                world.js
+              </a>
+            
+          </div>
+        </li>
+      </ul>
+    
+    <ul class="sections">
+        
+          <li id="title">
+              <div class="annotation">
+                  <h1>funciones.js</h1>
+              </div>
+          </li>
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <p>Create standard boxes of given height , width at x,y</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="keyword">var</span> Box2DUtils = <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span>
+
+	<span class="function"><span class="keyword">function</span> <span class="title">createBox</span><span class="params">(world, x, y, width, height, options)</span> 
+	{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <p>default setting</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	    options = $.extend(<span class="literal">true</span>, {
+	        <span class="string">'density'</span> : <span class="number">1.0</span> ,
+	        <span class="string">'friction'</span> : <span class="number">1.0</span> ,
+	        <span class="string">'restitution'</span> : <span class="number">0.5</span> ,
+	         
+	        <span class="string">'type'</span> : b2Body.b2_dynamicBody
+	    }, options);
+	       
+	    <span class="keyword">var</span> body_def = <span class="keyword">new</span> b2BodyDef();
+	    <span class="keyword">var</span> fix_def = <span class="keyword">new</span> b2FixtureDef();
+	     
+	    fix_def.density = options.density;
+	    fix_def.friction = options.friction;
+	    fix_def.restitution = options.restitution;
+	     
+	    fix_def.shape = <span class="keyword">new</span> b2PolygonShape();
+	         
+	    fix_def.shape.SetAsBox( width/<span class="number">2</span> , height/<span class="number">2</span> );
+	     
+	    body_def.position.Set(x , y);
+	     
+	    body_def.type = options.type;
+	    body_def.userData = options.user_data;
+	     
+	    <span class="keyword">var</span> b = world.CreateBody( body_def );
+	    <span class="keyword">var</span> f = b.CreateFixture(fix_def);
+	     
+	    <span class="keyword">return</span> b;
+	}
+
+}
+
+
+<span class="keyword">var</span> PixiUtils = <span class="function"><span class="keyword">function</span><span class="params">()</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>function createBox(world, x, y, width, height, options) </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.createBox = <span class="function"><span class="keyword">function</span> <span class="title">createBox</span><span class="params">(texture)</span> 
+	{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>default setting</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span>     options = $.extend(<span class="literal">true</span>, {
+	        <span class="string">'density'</span> : <span class="number">1.0</span> ,
+	        <span class="string">'friction'</span> : <span class="number">1.0</span> ,
+	        <span class="string">'restitution'</span> : <span class="number">0.5</span> ,
+	         
+	        <span class="string">'type'</span> : b2Body.b2_dynamicBody
+	    }, options);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>var texture = new PIXI.Texture.fromFrame(&quot;assets/bunny.png&quot;),</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		<span class="keyword">var</span>	box = <span class="keyword">new</span> PIXI.Sprite(PIXI.Texture.fromFrame(<span class="string">"assets/bunny.png"</span>));
+        
+        box.i = i;
+        box.anchor.x = box.anchor.y = <span class="number">0.5</span>;
+        box.scale.x = <span class="number">50</span> / <span class="number">50</span>;
+        box.scale.y = <span class="number">50</span> / <span class="number">50</span>;
+	     
+	    <span class="keyword">return</span> box;
+	}
+
+}
+
+<span class="keyword">var</span> PixiBox = <span class="function"><span class="keyword">function</span> <span class="params">()</span> {</span>
+
+
+
+        
+	<span class="keyword">this</span>.texture;
+	<span class="keyword">this</span>.box;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>function createBox(world, x, y, width, height, options) </p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">this</span>.createBox = <span class="function"><span class="keyword">function</span> <span class="title">createBox</span><span class="params">(containerDisplay)</span> 
+	{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>default setting</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	<span class="keyword">var</span>     options = $.extend(<span class="literal">true</span>, {
+	        <span class="string">'density'</span> : <span class="number">1.0</span> ,
+	        <span class="string">'friction'</span> : <span class="number">1.0</span> ,
+	        <span class="string">'restitution'</span> : <span class="number">0.5</span> ,
+	         
+	        <span class="string">'type'</span> : b2Body.b2_dynamicBody
+	    }, options);
+
+	       
+	<span class="keyword">const</span> loader = <span class="keyword">new</span> PIXI.AssetLoader([<span class="string">"assets/ball.png"</span>,
+                                             <span class="string">"assets/box.jpg"</span>,
+                                             <span class="string">"assets/bunny.png"</span>]);
+	
+		<span class="keyword">this</span>.texture = <span class="keyword">new</span> PIXI.Texture.fromFrame(<span class="string">"assets/bunny.png"</span>),
+		<span class="keyword">this</span>.box = <span class="keyword">new</span> PIXI.Sprite(<span class="keyword">this</span>.texture);
+        
+        <span class="keyword">this</span>.box.i = i;
+        <span class="keyword">this</span>.box.anchor.x = <span class="keyword">this</span>.box.anchor.y = <span class="number">0.5</span>;
+        <span class="keyword">this</span>.box.scale.x = <span class="number">50</span> / <span class="number">50</span>;
+        <span class="keyword">this</span>.box.scale.y = <span class="number">50</span> / <span class="number">50</span>;
+
+        containerDisplay.addChild(<span class="keyword">this</span>.box);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p>return box;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	}
+
+
+}
+
+
+
+<span class="function"><span class="keyword">function</span> <span class="title">createBox</span><span class="params">(posx, posy, scalex, scaley, texture)</span>{</span>
+    
+	box = <span class="keyword">new</span> PIXI.Sprite(texture);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>box.i = i;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    box.anchor.x = box.anchor.y = <span class="number">0.5</span>;
+    box.scale.x = scalex;
+    box.scale.y = scaley;
+	box.position.x = posx;
+    box.position.y = posy;
+
+    box.buttonMode = <span class="literal">true</span>;
+    box.interactive = <span class="literal">true</span>;
+
+    box.mouseover = <span class="function"><span class="keyword">function</span><span class="params">(data)</span>{</span>
+			
+		<span class="keyword">this</span>.isOver = <span class="literal">true</span>;
+		
+		<span class="keyword">if</span>(<span class="keyword">this</span>.isdown)<span class="keyword">return</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>this.setTexture(textureButtonOver)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>set the mouseout callback..</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	box.mouseout = <span class="function"><span class="keyword">function</span><span class="params">(data)</span>{</span>
+		
+		<span class="keyword">this</span>.isOver = <span class="literal">false</span>;
+		<span class="keyword">if</span>(<span class="keyword">this</span>.isdown)<span class="keyword">return</span>
+	}
+	
+	box.click = <span class="function"><span class="keyword">function</span><span class="params">(data)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>click!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		console.log(<span class="string">"CLICK!"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>alert(&quot;CLICK!&quot;)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	}
+	
+	box.tap = <span class="function"><span class="keyword">function</span><span class="params">(data)</span>{</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>click!</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>		console.log(<span class="string">"TAP!!"</span>);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>this.alpha = 0.5;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>	}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>console.log(&quot;create box&quot;);</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>     
+    <span class="keyword">return</span> box;
+}</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>
