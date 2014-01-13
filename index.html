@@ -250,7 +250,7 @@
       $scope.getScores = function() {
         var httpRequest = $http({
           method: 'GET',
-          url: 'http://localhost:8089/api/score',
+          url: 'http://ec2-54-229-248-250.eu-west-1.compute.amazonaws.com:8089/api/score',
         }).success(function(data, status) {
          $scope.scores = data;
         });
@@ -259,7 +259,36 @@
     }
 
 
-  	var socket = io.connect('http://localhost:8081');
+    //Sends the score via ajax
+    function sendScore (score) {
+         
+        $.ajax({
+            url : "http://ec2-54-229-248-250.eu-west-1.compute.amazonaws.com:8089/api/score",
+            type: "POST",
+            data : score,
+            success: function(data, textStatus, jqXHR)
+            {
+                console.log(data);
+            },
+            error: function (jqXHR, textStatus, errorThrown)
+            {
+                console.log(errorThrown);
+            }
+        });
+    }
+
+
+    //Opens a popup and sets the current player name to the one given
+    function changePlayerName () {
+        var player = prompt("New player! \nPlease enter your name");
+
+        localStorage.player = player;
+
+        $(".player").html(localStorage.player);
+
+    }
+
+  	var socket = io.connect('http://ec2-54-229-248-250.eu-west-1.compute.amazonaws.com:8081');
 	  socket.on('controller', function (data) {
 
 		if(data.move == "jump"){
@@ -276,6 +305,8 @@
 			socket.emit('sendgamestate', { status: 'endgame', points: points, meters: meters });
 			
 		}
+
+
 
 		/*$(function(){
 			DEBUG INFO var gui = new dat.GUI();

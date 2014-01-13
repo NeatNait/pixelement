@@ -569,32 +569,3 @@ function changeElement () {
 function jump () {
     jump = true;
 }
-
-//Sends the score via ajax
-function sendScore (score) {
-     
-    $.ajax({
-        url : "http://localhost:8089/api/score",
-        type: "POST",
-        data : score,
-        success: function(data, textStatus, jqXHR)
-        {
-            console.log(data);
-        },
-        error: function (jqXHR, textStatus, errorThrown)
-        {
-            console.log(errorThrown);
-        }
-    });
-}
-
-
-//Opens a popup and sets the current player name to the one given
-function changePlayerName () {
-    var player = prompt("New player! \nPlease enter your name");
-
-    localStorage.player = player;
-
-    $(".player").html(localStorage.player);
-
-}
