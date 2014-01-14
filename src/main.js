@@ -423,7 +423,7 @@ function start(){
         if(Math.floor(containerDisplay.position.x-STAGE_WIDTH)%STAGE_WIDTH == 0){
         */
         // The rate of the floor and ceil creation
-        if(cont%(60/1)==0){
+        if(cont%(60/2)==0){
             createFloor(floorActualX*6+1, 0.5);
             createFloor(floorActualX*6+1, 20);
             createFloor(floorActualX*6+1, Math.random()*10+5);
