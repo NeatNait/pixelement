@@ -1,17 +1,31 @@
 {
   "name": "pixelement",
-  "version": "0.0.1",
   "description": "pixelement game",
-  "main": "server.js",
-  "directories": {
-    "doc": "docs"
+  "readme": "",
+  "repository": "",
+  "version": "0.0.0",
+  "readme": "",
+  "repository": "",
+  "dependencies": {},
+  
+  "devDependencies": {
+    "bower": "*",
+    "gulp": "*",
+    "gulp-util": "*",
+    "gulp-clean": "*",
+    "gulp-concat": "*",
+    "gulp-download": "*",
+    "gulp-rename": "*",
+    "gulp-minify-css": "*",
+    "gulp-minify-html": "*",
+    "gulp-processhtml": "*",
+    "gulp-jshint": "*",
+    "gulp-uglify": "*",
+    "gulp-connect": "*",
+    "gulp-watch": "*",
+    "tiny-lr": "*"
   },
-  "dependencies": {
-    "socket.io": "~0.9.16",
-    "mongoose": "~3.8.4",
-    "express": "~3.4.7"
-  },
-  "devDependencies": {},
+
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -25,4 +39,10 @@
   ],
   "author": "NeatNait",
   "license": "BSD-2-Clause"
+    "post-install": "node ./node_modules/bower/bin/bower install",
+    "start": "node ./node_modules/gulp/bin/gulp.js",
+
+    "build": "node ./node_modules/gulp/bin/gulp.js build",
+    "lint":  "node ./node_modules/gulp/bin/gulp.js lint"
+  }
 }
