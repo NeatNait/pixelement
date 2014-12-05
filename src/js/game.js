@@ -8,6 +8,10 @@
   Game.prototype = {
 
     create: function () {
+
+      this.game.points = 0;
+
+
       var x = this.game.width / 2 - 200
         , y = this.game.height / 2;
 
@@ -65,6 +69,8 @@
           box.body.collides([this.boxCollisionGroup, this.playerCollisionGroup]);
       }
 
+      this.boxes.setAll('reward', this.game.config.ENEMY_REWARD, false, false, 0, true);
+      
       this.player.anchor.setTo(0.5, 0.5);
       //this.player.scale = new Phaser.Point(0.5, 0.5);
       this.player.scale.set(0.75);
@@ -172,15 +178,19 @@
           player = body1.sprite;
       //enemy.alpha -= 0.1;
 
+      //enemy kills player
       if(!~enemy.beatedBy.indexOf(player.power)){
         player.kill();
         this.game.state.start('menu');
       }
+      //player kills enemy
       else{
         var tween = this.game.add.tween(enemy).to( { alpha: 0.5 }, 200, Phaser.Easing.Bounce.Out, true);
         tween.onComplete.add(function() { 
           enemy.kill()
         }, this);
+        this.game.points += enemy.reward;
+        console.log(this.game.points);
       }
       //console.log(enemy.power);
       //console.log('player' + body1.sprite.power);
@@ -193,17 +203,16 @@
       if (this.game.time.now > this.nextEnemy){
         this.nextEnemy = this.game.time.now + enemyRate;
         //var box = this.boxes.getFirstAlive();
+        
         var box = this.boxes.next();
-
 
         if(!box){
           return;
         }
 
+        box.reset(this.player.x + this.game.width + 10, this.game.rnd.integerInRange(0, this.game.height));
         box.alpha = 1;
 
-
-        box.reset(this.player.x + this.game.width + 10, this.game.rnd.integerInRange(0, this.game.height));
       }
 
     },
