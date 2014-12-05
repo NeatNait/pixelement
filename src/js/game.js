@@ -93,11 +93,11 @@
       //this.player.body.velocity.x = 150;
       //this.player.body.velocity.setTo(150, 0);
       this.input.onDown.add(this.onMouseDown, this);
-      this.input.keyboard.addCallbacks(this, this.onInputDown);
+      //this.input.keyboard.addCallbacks(this, this.onInputDown);
       
       //this.input.keyboard.onUpCallback = this.onInput
       
-      this.jumpKey = this.input.keyboard.addKey(Phaser.Keyboard.UP);
+      this.jumpKey = this.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
       //this.game.camera.follow(this.player);
 
