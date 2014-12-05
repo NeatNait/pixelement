@@ -24,6 +24,11 @@
         this.game.scale.pageAlignHorizontally = true;
         this.game.scale.setScreenSize(true);
       }
+
+      this.game.config = {
+        ENEMY_REWARD: 1
+      }
+
       this.game.state.start('preloader');
     }
   };
