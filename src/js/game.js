@@ -33,9 +33,26 @@
       this.boxes.physicsBodyType = Phaser.Physics.P2JS;
 
       for (var i = 0; i < 60; i++){
-          var box = this.boxes.create(200, 100, 'blue');
+
+          var color = 'blue',
+              beatedBy = [color, 'green'];
+
+          if(i%2){
+            color = 'red';
+            beatedBy = [color, 'blue'];
+          }
+          else if(i%3){
+            color = 'green';
+            beatedBy = [color, 'red'];
+          }
+
+
+          var box = this.boxes.create(-5000, this.game.height, color);
           //var box = this.boxes.create(this.game.world.randomX, this.game.world.randomY, 'blue');
           box.body.setRectangle(40, 40);
+
+          box.power = color;
+          box.beatedBy = beatedBy;
 
           box.scale.set(0.5);
 
@@ -50,9 +67,13 @@
 
       this.player.anchor.setTo(0.5, 0.5);
       //this.player.scale = new Phaser.Point(0.5, 0.5);
-      this.player.scale.set(0.5);
+      this.player.scale.set(0.75);
 
-      this.game.physics.p2.enable(this.player, true);
+      //  Enable if for physics. This creates a default rectangular body.
+      this.game.physics.p2.enable(this.player, false);
+
+      this.player.body.data.gravityScale = 2;
+
       this.player.body.setRectangle(60, 60);
       //this.player.body.setRectangle(this.player.scale.x, this.player.scale.y); 
       //ship.body.fixedRotation = true;
@@ -63,15 +84,16 @@
       //  When boxes collide with each other, nothing happens to them.
       this.player.body.collides(this.boxCollisionGroup, this.hitEnemy, this);
 
-
+      this.player.powers = ['red','blue', 'green'];
+      this.player.power = this.player.powers[0];
 
      
 
 
       //this.player.body.velocity.x = 150;
       //this.player.body.velocity.setTo(150, 0);
-      this.input.onDown.add(this.onInputDown, this);
-      //this.input.keyboard.addCallbacks(this, this.onInputDown);
+      this.input.onDown.add(this.onMouseDown, this);
+      this.input.keyboard.addCallbacks(this, this.onInputDown);
       
       //this.input.keyboard.onUpCallback = this.onInput
       
@@ -85,8 +107,7 @@
       //  Make things a bit more bouncey
       //this.game.physics.p2.defaultRestitution = 0.8;
 
-      //  Enable if for physics. This creates a default rectangular body.
-      this.game.physics.p2.enable(this.player, true);
+
 
       //this.player.body.rotateLeft(20);
 
@@ -104,7 +125,8 @@
     update: function () {
       //this.player.rotation += 0.01;
       //this.player.body.rotateRight(50);
-      this.player.body.velocity.x = 350;
+      //this.player.body.velocity.x = 350;
+      this.player.body.velocity.x = 250;
       this.camera.position = new Phaser.Point(this.player.position.x - 150, this.player.position.y - 150);
       //this.player.body.thrust(50);
       //this.player.body.rotateLeft(20);
@@ -118,16 +140,50 @@
 
     },
 
+    onMouseDown: function () {
+      //this.player.power = 'blue';
+
+      var i = this.player.powers.indexOf(this.player.power);
+
+      i++;
+      
+      if(this.player.powers[i]){
+        this.player.power = this.player.powers[i];
+      }
+      else{
+        this.player.power = this.player.powers[0];
+      }
+
+      this.player.loadTexture(this.player.power);
+
+    },
+
     onInputDown: function () {
       //this.game.state.start('menu');
-      this.player.body.velocity.y = -350;
+      //this.player.body.velocity.y = -350;
+      this.player.body.velocity.y = -450;
     },
 
     hitEnemy: function (body1, body2) {
       //  body1 is the player (as it's the body that owns the callback)
       //  body2 is the body it impacted with, in this case our box
       //  As body2 is a Phaser.Physics.P2.Body object, you access its own (the sprite) via the sprite property:
-      //body2.sprite.alpha -= 0.1;
+      var enemy = body2.sprite,
+          player = body1.sprite;
+      //enemy.alpha -= 0.1;
+
+      if(!~enemy.beatedBy.indexOf(player.power)){
+        player.kill();
+        this.game.state.start('menu');
+      }
+      else{
+        var tween = this.game.add.tween(enemy).to( { alpha: 0.5 }, 200, Phaser.Easing.Bounce.Out, true);
+        tween.onComplete.add(function() { 
+          enemy.kill()
+        }, this);
+      }
+      //console.log(enemy.power);
+      //console.log('player' + body1.sprite.power);
     },
 
     addEnemy: function () {
@@ -139,9 +195,13 @@
         //var box = this.boxes.getFirstAlive();
         var box = this.boxes.next();
 
+
         if(!box){
           return;
         }
+
+        box.alpha = 1;
+
 
         box.reset(this.player.x + this.game.width + 10, this.game.rnd.integerInRange(0, this.game.height));
       }
@@ -151,7 +211,7 @@
     render: function (){
       this.game.debug.cameraInfo(this.game.camera, 32, 32);
       this.game.debug.spriteCoords(this.player, 32, 500);
-      this.game.debug.body(this.player);
+     // this.game.debug.body(this.player);
     }
 
   };
