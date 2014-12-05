@@ -10,19 +10,18 @@
     create: function () {
 
       this.game.points = 0;
-
-
-      var x = this.game.width / 2 - 200
-        , y = this.game.height / 2;
+      
+      var x = this.game.width / 2 - 200,
+          y = this.game.height / 2;
 
       this.game.world.setBounds(0, 0, 1000000, this.game.height);
 
-      this.player = this.add.sprite(0, 0, 'player');
+      this.player = this.add.sprite(0, this.game.height, 'player');
+
       this.game.physics.startSystem(Phaser.Physics.P2JS);
+     
       //  Turn on impact events for the world, without this we get no collision callbacks
       this.game.physics.p2.setImpactEvents(true);
-      //this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
-
 
       //  Create our collision groups. One for the player, one for the boxes
       this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
@@ -69,6 +68,7 @@
           box.body.collides([this.boxCollisionGroup, this.playerCollisionGroup]);
       }
 
+      //set attribute reward of every enemy
       this.boxes.setAll('reward', this.game.config.ENEMY_REWARD, false, false, 0, true);
       
       this.player.anchor.setTo(0.5, 0.5);
@@ -79,10 +79,12 @@
       this.game.physics.p2.enable(this.player, false);
 
       this.player.body.data.gravityScale = 2;
+      //this.player.body.rotateLeft(200);
+
 
       this.player.body.setRectangle(60, 60);
-      //this.player.body.setRectangle(this.player.scale.x, this.player.scale.y); 
       //ship.body.fixedRotation = true;
+
       //  Set the ships collision group
       this.player.body.setCollisionGroup(this.playerCollisionGroup);
 
@@ -92,7 +94,6 @@
 
       this.player.powers = ['red','blue', 'green'];
       this.player.power = this.player.powers[0];
-
      
 
 
@@ -114,16 +115,9 @@
       //this.game.physics.p2.defaultRestitution = 0.8;
 
 
-
-      //this.player.body.rotateLeft(20);
-
-      //this.player.rotation = 0.5;
       //  Modify a few body properties
       //this.player.body.setZeroDamping();
       //this.player.body.fixedRotation = true;
-
-      //this.game.plugins.Splatter = this.game.plugins.add(Phaser.Plugin.Splatter);
-      //this.game.plugins.Splatter.addSprite(this.add.sprite(x, y, 'splatter'));
 
       this.nextEnemy = 0;
     },
@@ -143,11 +137,9 @@
 
       this.addEnemy();
 
-
     },
 
     onMouseDown: function () {
-      //this.player.power = 'blue';
 
       var i = this.player.powers.indexOf(this.player.power);
 
