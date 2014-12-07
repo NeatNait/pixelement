@@ -27,7 +27,7 @@
 
       this.game.config = {
         ENEMY_REWARD: 1
-      }
+      };
 
       this.game.state.start('preloader');
     }
