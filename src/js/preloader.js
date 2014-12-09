@@ -34,10 +34,18 @@
       this.game.fx.addMarker('touch2', 1.866, 2.791, 0.1);
       this.game.fx.addMarker('touch3', 2.791, 3.725, 0.1);
 
+      this.load.image('platform', 'assets/floor2.png');
+      //this.load.image('splatter', 'assets/splatter.png');
+      this.load.bitmapFont('minecraftia', 'assets/minecraftia.png', 'assets/minecraftia.xml');
+
+      // Audios
+      //this.load.audio('point', 'assets/audio/point.ogg');
+      this.load.audio('dead', 'assets/sound/dead1.mp3');
+      this.load.audio('loop1', 'assets/sound/loop1.mp3');
     },
 
     create: function () {
-      this.asset.cropEnabled = false;
+      this.asset.cropEnabled = false;      
     },
 
     update: function () {
