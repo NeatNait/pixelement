@@ -10,7 +10,7 @@
     create: function () {
 
       this.game.points = 0;
-      
+
       var x = this.game.width / 2 - 200,
           y = this.game.height / 2;
 

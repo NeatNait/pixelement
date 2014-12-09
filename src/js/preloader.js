@@ -18,7 +18,6 @@
       this.load.image('blue', 'assets/blue.png');
       this.load.image('red', 'assets/red.png');
       this.load.image('green', 'assets/green.png');
-      //this.load.image('splatter', 'assets/splatter.png');
       this.load.bitmapFont('minecraftia', 'assets/minecraftia.png', 'assets/minecraftia.xml');
     },
 
