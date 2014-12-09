@@ -35,7 +35,6 @@
       this.game.fx.addMarker('touch3', 2.791, 3.725, 0.1);
 
       this.load.image('platform', 'assets/floor2.png');
-      //this.load.image('splatter', 'assets/splatter.png');
       this.load.bitmapFont('minecraftia', 'assets/minecraftia.png', 'assets/minecraftia.xml');
 
       // Audios
