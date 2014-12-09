@@ -177,6 +177,8 @@
       }
       //player kills enemy
       else{
+        this.game.fx.play('touch' + this.game.rnd.integerInRange(0, 3));
+
         var tween = this.game.add.tween(enemy).to( { alpha: 0.5 }, 200, Phaser.Easing.Bounce.Out, true);
         tween.onComplete.add(function() { 
           enemy.kill()
