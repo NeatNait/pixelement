@@ -41,11 +41,30 @@
       //this.load.audio('point', 'assets/audio/point.ogg');
       this.load.audio('dead', 'assets/sound/dead1.mp3');
       this.load.audio('loop1', 'assets/sound/loop1.mp3');
+
+
+      this.AtumPlugin = this.game.plugins.add(Phaser.Plugin.AtumPlugin);
+
+      //this.AtumPlugin.updateUnits();
+      //this.AtumPlugin.removeUnits(1);
+      //this.AtumPlugin.updateUnits();
+      //this.AtumPlugin.updateUnits();
+      //this.AtumPlugin.updateUnits();
+
+      this.AtumPlugin.init({
+        localStoragePrefix: 'com.neatnait.pixelement.test.',
+        unitsPerTick: 5,
+        maxUnits: 10
+      });
+      
+      this.AtumPlugin.updateUnits();
+
     },
 
     create: function () {
       this.asset.cropEnabled = false;      
-    },
+      this.game.time.events.loop(Phaser.Timer.SECOND, this.updateCounter, this);
+    },    
 
     update: function () {
       if (!!this.ready) {
