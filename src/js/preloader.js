@@ -43,6 +43,8 @@
       this.load.audio('loop1', 'assets/sound/loop1.mp3');
 
 
+      this.game.add.plugin(Phaser.Plugin.Debug);
+
       this.AtumPlugin = this.game.plugins.add(Phaser.Plugin.AtumPlugin);
 
       //this.AtumPlugin.updateUnits();

@@ -6,5 +6,8 @@
   ],
   "dependencies": {
     "phaser-official": "latest"
+  },
+  "devDependencies": {
+    "phaser-debug": "https://github.com/englercj/phaser-debug.git#~1.1.4"
   }
 }
